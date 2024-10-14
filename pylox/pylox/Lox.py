@@ -1,8 +1,11 @@
 # /bin/env python3
 import sys
-import logging
+from typing import overload
 
+from ast_printer import AstPrinter
+from Expr import Expr
 from Token import Token
+from TokenTypes import TokenType
 
 
 class Lox:
@@ -26,15 +29,39 @@ class Lox:
 
     @staticmethod
     def _run(source: str):
+        from Parser import Parser
         from Scanner import Scanner
         scanner: Scanner = Scanner(source)
         tokens: list[Token] = scanner.scan_tokens()
-        for token in tokens:
-            print(token)
+        parser: Parser = Parser(tokens)
+        expression: Expr | None = parser.parse()
+
+        if Lox._had_error:
+            return
+
+        if not expression:
+            print(None)
+            return
+
+        print(AstPrinter().print(expression))
+
+    @overload
+    @staticmethod
+    def error(line: int, message: str) -> None: ...
+
+    @overload
+    @staticmethod
+    def error(token: Token, message: str) -> None: ...
 
     @staticmethod
-    def error(line: int, message: str):
-        Lox._report(line, "", message)
+    def error(arg: int | Token, message: str) -> None:
+        if isinstance(arg, int):
+            Lox._report(arg, "", message)
+        else:
+            if arg.type == TokenType.EOF:
+                Lox._report(arg.line, " at end", message)
+            else:
+                Lox._report(arg.line, f" at '{arg.lexeme}'", message)
 
     @staticmethod
     def _report(line: int, where: str, message: str):
