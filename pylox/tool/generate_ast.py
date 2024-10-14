@@ -34,8 +34,7 @@ from Token import Token
 
 class {base_name}(ABC):
     @abstractmethod
-    def accept[R](self, visitor: Visitor[R]) -> R:
-        pass
+    def accept[R](self, visitor: Visitor[R]) -> R: ...
 
 
 """
@@ -56,9 +55,7 @@ def define_visitor(f: TextIO, base_name: str, types: list[str]):
         f.writelines(
             [
                 "    @abstractmethod\n",
-                f"    def visit_{type_name}_{base_name}(self, {base_name.lower()}: {type_name}) -> R:\n",
-                "        pass\n",
-                "\n",
+                f"    def visit_{type_name}_{base_name}(self, {base_name.lower()}: {type_name}) -> R: ...\n",
                 "\n",
             ]
         )
@@ -74,7 +71,6 @@ def define_type(f: TextIO, base_name: str, cls_name: str, field_list: str):
         field_type = field.split(":")[1].strip()
         f.write(f"        self.{field_name}: Final[{field_type}] = {field_name}\n")
     f.write("\n")
-    f.write("\n")
     f.writelines(
         [
             "    @override\n",
@@ -82,7 +78,6 @@ def define_type(f: TextIO, base_name: str, cls_name: str, field_list: str):
             f"        return visitor.visit_{cls_name}_{base_name}(self)\n",
         ]
     )
-    f.write("\n")
     f.write("\n")
 
 

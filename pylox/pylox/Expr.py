@@ -7,26 +7,21 @@ from Token import Token
 
 class Expr(ABC):
     @abstractmethod
-    def accept[R](self, visitor: Visitor[R]) -> R:
-        pass
+    def accept[R](self, visitor: Visitor[R]) -> R: ...
 
 
 class Visitor[R]:
     @abstractmethod
-    def visit_Binary_Expr(self, expr: Binary) -> R:
-        pass
+    def visit_Binary_Expr(self, expr: Binary) -> R: ...
 
     @abstractmethod
-    def visit_Grouping_Expr(self, expr: Grouping) -> R:
-        pass
+    def visit_Grouping_Expr(self, expr: Grouping) -> R: ...
 
     @abstractmethod
-    def visit_Literal_Expr(self, expr: Literal) -> R:
-        pass
+    def visit_Literal_Expr(self, expr: Literal) -> R: ...
 
     @abstractmethod
-    def visit_Unary_Expr(self, expr: Unary) -> R:
-        pass
+    def visit_Unary_Expr(self, expr: Unary) -> R: ...
 
 
 class Binary(Expr):
