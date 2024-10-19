@@ -1,5 +1,4 @@
 from typing import Final, List
-from Lox import Lox
 from Token import Token
 from TokenTypes import TokenType
 
@@ -101,6 +100,8 @@ class Scanner:
                 elif self._is_alpha(c):
                     self._identifier()
                 else:
+                    from Lox import Lox
+
                     Lox.error(self._line, "Unexpected character.")
 
     def _add_token(self, type: TokenType, literal: object = None) -> None:
@@ -138,6 +139,8 @@ class Scanner:
             self._advance()
 
         if self._is_at_end():
+            from Lox import Lox
+
             Lox.error(self._line, "Unterminated string")
             return
 

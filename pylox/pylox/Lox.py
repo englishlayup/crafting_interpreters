@@ -1,15 +1,20 @@
 # /bin/env python3
 import sys
-from typing import overload
+from typing import Optional, overload
 
-from ast_printer import AstPrinter
 from Expr import Expr
 from Token import Token
 from TokenTypes import TokenType
+from RuntimeError import RuntimeError
+from Interpreter import Interpreter
+from Parser import Parser
+from Scanner import Scanner
 
 
 class Lox:
+    _interpreter: Interpreter = Interpreter()
     _had_error = False
+    _had_runtime_error = False
 
     @staticmethod
     def _run_file(path: str):
@@ -17,6 +22,8 @@ class Lox:
             Lox._run(f.read())
         if Lox._had_error:
             sys.exit(65)
+        if Lox._had_runtime_error:
+            sys.exit(70)
 
     @staticmethod
     def _run_prompt():
@@ -29,21 +36,17 @@ class Lox:
 
     @staticmethod
     def _run(source: str):
-        from Parser import Parser
-        from Scanner import Scanner
+
         scanner: Scanner = Scanner(source)
         tokens: list[Token] = scanner.scan_tokens()
         parser: Parser = Parser(tokens)
-        expression: Expr | None = parser.parse()
+        expression: Optional[Expr] = parser.parse()
 
         if Lox._had_error:
             return
 
-        if not expression:
-            print(None)
-            return
-
-        print(AstPrinter().print(expression))
+        assert expression is not None
+        Lox._interpreter.interpret(expression)
 
     @overload
     @staticmethod
@@ -54,7 +57,7 @@ class Lox:
     def error(token: Token, message: str) -> None: ...
 
     @staticmethod
-    def error(arg: int | Token, message: str) -> None:
+    def error(arg: int | Token, message: str) -> None:  # type: ignore[reportInconsistentOverload]
         if isinstance(arg, int):
             Lox._report(arg, "", message)
         else:
@@ -64,6 +67,11 @@ class Lox:
                 Lox._report(arg.line, f" at '{arg.lexeme}'", message)
 
     @staticmethod
+    def runtime_error(error: RuntimeError):
+        print(f"{error}\n[line {error.token.line}]", file=sys.stderr)
+        Lox._had_runtime_error = True
+
+    @staticmethod
     def _report(line: int, where: str, message: str):
         print(f"[{line}] Error{where}: {message}")
         Lox._had_error = True
@@ -71,7 +79,7 @@ class Lox:
     @staticmethod
     def main() -> None:
         if len(sys.argv) > 2:
-            logging.error("Usage: pylox [script]")
+            print("Usage: pylox [script]", file=sys.stderr)
             sys.exit(64)
         elif len(sys.argv) == 2:
             Lox._run_file(sys.argv[0])

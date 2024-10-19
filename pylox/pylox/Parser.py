@@ -1,7 +1,6 @@
 from typing import Final, Optional
 
 from Expr import Binary, Expr, Grouping, Literal, Unary
-from Lox import Lox
 from Token import Token
 from TokenTypes import TokenType
 
@@ -114,6 +113,7 @@ class Parser:
         raise self._error(self._peek(), message)
 
     def _error(self, token: Token, message: str) -> ParseError:
+        from Lox import Lox
         Lox.error(token.line, message)
         return self.ParseError()
 
