@@ -18,6 +18,12 @@ class Interpreter(Visitor[object]):
         if obj is None:
             return "nil"
 
+        if obj is True:
+            return "true"
+
+        if obj is False:
+            return "false"
+
         if isinstance(obj, float):
             text = str(obj)
             if text.endswith(".0"):
