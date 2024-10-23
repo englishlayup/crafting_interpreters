@@ -20,6 +20,15 @@ def generate_ast():
         ],
     )
 
+    define_ast(
+        output_dir,
+        "Stmt",
+        [
+            "Expression : expression: Expr",
+            "Print : expression: Expr",
+        ],
+    )
+
 
 def define_ast(output_dir: str, base_name: str, types: list[str]):
     with open(f"{output_dir}/{base_name}.py", mode="w", encoding="utf-8") as f:

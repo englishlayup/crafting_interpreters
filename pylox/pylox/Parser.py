@@ -1,8 +1,9 @@
-from typing import Final, Optional
+from typing import Final
 
 from Expr import Binary, Expr, Grouping, Literal, Unary
 from Token import Token
 from TokenTypes import TokenType
+from Stmt import Expression, Stmt, Print
 
 
 class Parser:
@@ -12,14 +13,32 @@ class Parser:
         self._tokens: Final[list[Token]] = tokens
         self._current: int = 0
 
-    def parse(self) -> Optional[Expr]:
-        try:
-            return self._expression()
-        except self.ParseError:
-            return None
+    def parse(self) -> list[Stmt]:
+        statements: list[Stmt] = []
+
+        while not self._is_at_end():
+            statements.append(self._statement())
+
+        return statements
 
     def _expression(self):
         return self._equality()
+
+    def _statement(self):
+        if self._match(TokenType.PRINT):
+            return self._print_statement()
+
+        return self._expression_statement()
+
+    def _print_statement(self):
+        value: Expr = self._expression()
+        self._consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return Print(value)
+
+    def _expression_statement(self):
+        value: Expr = self._expression()
+        self._consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        return Expression(value)
 
     def _equality(self) -> Expr:
         # equality       → comparison ( ( "!=" | "==" ) comparison )* ;
@@ -114,6 +133,7 @@ class Parser:
 
     def _error(self, token: Token, message: str) -> ParseError:
         from Lox import Lox
+
         Lox.error(token.line, message)
         return self.ParseError()
 
