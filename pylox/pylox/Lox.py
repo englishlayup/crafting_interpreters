@@ -36,16 +36,14 @@ class Lox:
 
     @staticmethod
     def _run(source: str):
-
         scanner: Scanner = Scanner(source)
         tokens: list[Token] = scanner.scan_tokens()
         parser: Parser = Parser(tokens)
         expression: Optional[Expr] = parser.parse()
 
-        if Lox._had_error:
+        if Lox._had_error or expression is None:
             return
 
-        assert expression is not None
         Lox._interpreter.interpret(expression)
 
     @overload
