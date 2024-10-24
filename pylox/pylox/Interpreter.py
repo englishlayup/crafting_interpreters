@@ -42,12 +42,8 @@ class Interpreter(Visitor[object]):
             case TokenType.PLUS:
                 if isinstance(left, float) and isinstance(right, float):
                     return left + right
-                if isinstance(left, str) and isinstance(right, str):
-                    return left + right
-                if isinstance(left, str):
-                    return left + self._stringify(right)
-                if isinstance(right, str):
-                    return self._stringify(left) + right
+                if isinstance(left, str) or isinstance(right, str):
+                    return self._stringify(left) + self._stringify(right)
                 raise RuntimeError(
                     expr.operator,
                     "Both operands must be two numbers or at least one operand has to be a string.",
