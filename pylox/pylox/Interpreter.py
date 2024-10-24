@@ -1,19 +1,23 @@
 from typing import override
-from Expr import Binary, Expr, Grouping, Literal, Unary, Visitor
+from Expr import Binary, Expr, Grouping, Literal, Unary, Visitor as ExprVisitor
 from Token import Token
 from TokenTypes import TokenType
 from RuntimeError import RuntimeError
+from Stmt import Expression, Print, Stmt, Visitor as StmtVisitor
 
 
-class Interpreter(Visitor[object]):
-    def interpret(self, expr: Expr):
+class Interpreter(ExprVisitor[object], StmtVisitor[None]):
+    def interpret(self, statements: list[Stmt]):
         try:
-            value: object = self._evaluate(expr)
-            print(self._stringify(value))
+            for statement in statements:
+                self._execute(statement)
         except RuntimeError as e:
             from Lox import Lox
 
             Lox.runtime_error(e)
+
+    def _execute(self, statement: Stmt):
+        statement.accept(self)
 
     def _stringify(self, obj: object):
         if obj is None:
@@ -135,3 +139,13 @@ class Interpreter(Visitor[object]):
 
     def _evaluate(self, expr: Expr):
         return expr.accept(self)
+
+    @override
+    def visit_Expression_Stmt(self, stmt: Expression) -> None:
+        self._evaluate(stmt.expression)
+
+    @override
+    def visit_Print_Stmt(self, stmt: Print) -> None:
+        value: object = self._evaluate(stmt.expression)
+        print(self._stringify(value))
+

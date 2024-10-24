@@ -1,14 +1,14 @@
 # /bin/env python3
 import sys
-from typing import Optional, overload
+from typing import overload
 
-from Expr import Expr
 from Token import Token
 from TokenTypes import TokenType
 from RuntimeError import RuntimeError
 from Interpreter import Interpreter
 from Parser import Parser
 from Scanner import Scanner
+from Stmt import Stmt
 
 
 class Lox:
@@ -39,12 +39,12 @@ class Lox:
         scanner: Scanner = Scanner(source)
         tokens: list[Token] = scanner.scan_tokens()
         parser: Parser = Parser(tokens)
-        expression: Optional[Expr] = parser.parse()
+        statements: list[Stmt] = parser.parse()
 
-        if Lox._had_error or expression is None:
+        if Lox._had_error:
             return
 
-        Lox._interpreter.interpret(expression)
+        Lox._interpreter.interpret(statements)
 
     @overload
     @staticmethod
