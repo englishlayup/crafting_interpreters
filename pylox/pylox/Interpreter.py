@@ -12,6 +12,7 @@ class Interpreter(Visitor[object]):
             print(self._stringify(value))
         except RuntimeError as e:
             from Lox import Lox
+
             Lox.runtime_error(e)
 
     def _stringify(self, obj: object):
@@ -40,12 +41,16 @@ class Interpreter(Visitor[object]):
         match expr.operator.type:
             case TokenType.PLUS:
                 if isinstance(left, float) and isinstance(right, float):
-                    return float(left) + float(right)
+                    return left + right
                 if isinstance(left, str) and isinstance(right, str):
-                    return str(left) + str(right)
+                    return left + right
+                if isinstance(left, str):
+                    return left + self._stringify(right)
+                if isinstance(right, str):
+                    return self._stringify(left) + right
                 raise RuntimeError(
                     expr.operator,
-                    "Operands must be two numbers or two strings.",
+                    "Both operands must be two numbers or at least one operand has to be a string.",
                 )
             case TokenType.MINUS:
                 self._check_number_operands(expr.operator, left, right)
@@ -55,6 +60,11 @@ class Interpreter(Visitor[object]):
                 return float(left) * float(right)  # type: ignore[ReportArgumentType]
             case TokenType.SLASH:
                 self._check_number_operands(expr.operator, left, right)
+                if right == 0:
+                    raise RuntimeError(
+                        expr.operator,
+                        "Right operand cannot be 0.",
+                    )
                 return float(left) / float(right)  # type: ignore[ReportArgumentType]
             case TokenType.LESS:
                 self._check_number_operands(expr.operator, left, right)
