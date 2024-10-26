@@ -3,7 +3,7 @@ from typing import Final
 from Expr import Assign, Binary, Expr, Grouping, Literal, Unary, Variable
 from Token import Token
 from TokenTypes import TokenType
-from Stmt import Expression, Stmt, Print, Var
+from Stmt import Block, Expression, Stmt, Print, Var
 
 
 class Parser:
@@ -47,9 +47,11 @@ class Parser:
             self._synchronize()
             return None
 
-    def _statement(self):
+    def _statement(self) -> Stmt:
         if self._match(TokenType.PRINT):
             return self._print_statement()
+        if self._match(TokenType.LEFT_BRACE):
+            return Block(self._block())
 
         return self._expression_statement()
 
@@ -72,6 +74,15 @@ class Parser:
         value: Expr = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return Expression(value)
+
+    def _block(self):
+        statements: list[Stmt] = []
+
+        while not self._check(TokenType.RIGHT_BRACE) and not self._is_at_end():
+            statements.append(self._declaration())  # type: ignore[reportArgumentType]
+
+        self._consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+        return statements
 
     def _equality(self) -> Expr:
         # equality       → comparison ( ( "!=" | "==" ) comparison )* ;

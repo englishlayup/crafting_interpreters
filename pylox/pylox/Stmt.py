@@ -13,6 +13,9 @@ class Stmt(ABC):
 
 class Visitor[R]:
     @abstractmethod
+    def visit_Block_Stmt(self, stmt: Block) -> R: ...
+
+    @abstractmethod
     def visit_Expression_Stmt(self, stmt: Expression) -> R: ...
 
     @abstractmethod
@@ -20,6 +23,16 @@ class Visitor[R]:
 
     @abstractmethod
     def visit_Var_Stmt(self, stmt: Var) -> R: ...
+
+
+class Block(Stmt):
+    def __init__(self, statements: list[Stmt]):
+        super().__init__()
+        self.statements: Final[list[Stmt]] = statements
+
+    @override
+    def accept[R](self, visitor: Visitor[R]) -> R:
+        return visitor.visit_Block_Stmt(self)
 
 
 class Expression(Stmt):

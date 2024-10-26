@@ -12,7 +12,7 @@ from Expr import (
 from Token import Token
 from TokenTypes import TokenType
 from RuntimeError import RuntimeError
-from Stmt import Expression, Print, Stmt, Var, Visitor as StmtVisitor
+from Stmt import Block, Expression, Print, Stmt, Var, Visitor as StmtVisitor
 from Environment import Environment
 
 
@@ -32,6 +32,20 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
 
     def _execute(self, statement: Stmt):
         statement.accept(self)
+
+    def _execute_block(self, statements: list[Stmt], environment: Environment):
+        previous: Environment = self._environment
+        try:
+            self._environment = environment
+
+            for statement in statements:
+                self._execute(statement)
+        finally:
+            self._environment = previous
+
+    @override
+    def visit_Block_Stmt(self, stmt: Block) -> None:
+        self._execute_block(stmt.statements, Environment(self._environment))
 
     def _stringify(self, obj: object):
         if obj is None:
