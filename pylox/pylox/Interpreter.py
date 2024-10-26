@@ -1,12 +1,25 @@
 from typing import override
-from Expr import Binary, Expr, Grouping, Literal, Unary, Visitor as ExprVisitor
+from Expr import (
+    Binary,
+    Expr,
+    Grouping,
+    Literal,
+    Unary,
+    Variable,
+    Visitor as ExprVisitor,
+)
 from Token import Token
 from TokenTypes import TokenType
 from RuntimeError import RuntimeError
-from Stmt import Expression, Print, Stmt, Visitor as StmtVisitor
+from Stmt import Expression, Print, Stmt, Var, Visitor as StmtVisitor
+from Environment import Environment
 
 
 class Interpreter(ExprVisitor[object], StmtVisitor[None]):
+    def __init__(self) -> None:
+        super().__init__()
+        self._environment: Environment = Environment()
+
     def interpret(self, statements: list[Stmt]):
         try:
             for statement in statements:
@@ -115,6 +128,10 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
         # Unreachable
         return None
 
+    @override
+    def visit_Variable_Expr(self, expr: Variable) -> object:
+        return self._environment.get(expr.name)
+
     def _check_number_operand(self, operator: Token, operand: object) -> None:
         if isinstance(operand, float):
             return
@@ -149,3 +166,10 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
         value: object = self._evaluate(stmt.expression)
         print(self._stringify(value))
 
+    @override
+    def visit_Var_Stmt(self, stmt: Var) -> None:
+        value: object = None
+        if stmt.initializer:
+            value = self._evaluate(stmt.initializer)
+
+        self._environment.define(stmt.name.lexeme, value)

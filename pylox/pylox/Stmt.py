@@ -2,6 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Final, override
 
+from Token import Token
 from Expr import Expr
 
 
@@ -16,6 +17,9 @@ class Visitor[R]:
 
     @abstractmethod
     def visit_Print_Stmt(self, stmt: Print) -> R: ...
+
+    @abstractmethod
+    def visit_Var_Stmt(self, stmt: Var) -> R: ...
 
 
 class Expression(Stmt):
@@ -36,3 +40,14 @@ class Print(Stmt):
     @override
     def accept[R](self, visitor: Visitor[R]) -> R:
         return visitor.visit_Print_Stmt(self)
+
+
+class Var(Stmt):
+    def __init__(self, name: Token, initializer: Expr):
+        super().__init__()
+        self.name: Final[Token] = name
+        self.initializer: Final[Expr] = initializer
+
+    @override
+    def accept[R](self, visitor: Visitor[R]) -> R:
+        return visitor.visit_Var_Stmt(self)

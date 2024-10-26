@@ -23,6 +23,9 @@ class Visitor[R]:
     @abstractmethod
     def visit_Unary_Expr(self, expr: Unary) -> R: ...
 
+    @abstractmethod
+    def visit_Variable_Expr(self, expr: Variable) -> R: ...
+
 
 class Binary(Expr):
     def __init__(self, left: Expr, operator: Token, right: Expr):
@@ -65,3 +68,13 @@ class Unary(Expr):
     @override
     def accept[R](self, visitor: Visitor[R]) -> R:
         return visitor.visit_Unary_Expr(self)
+
+
+class Variable(Expr):
+    def __init__(self, name: Token):
+        super().__init__()
+        self.name: Final[Token] = name
+
+    @override
+    def accept[R](self, visitor: Visitor[R]) -> R:
+        return visitor.visit_Variable_Expr(self)

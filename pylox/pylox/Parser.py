@@ -1,9 +1,9 @@
 from typing import Final
 
-from Expr import Binary, Expr, Grouping, Literal, Unary
+from Expr import Binary, Expr, Grouping, Literal, Unary, Variable
 from Token import Token
 from TokenTypes import TokenType
-from Stmt import Expression, Stmt, Print
+from Stmt import Expression, Stmt, Print, Var
 
 
 class Parser:
@@ -17,12 +17,21 @@ class Parser:
         statements: list[Stmt] = []
 
         while not self._is_at_end():
-            statements.append(self._statement())
+            statements.append(self._declaration()) # type: ignore[reportArgumentType]
 
         return statements
 
     def _expression(self):
         return self._equality()
+
+    def _declaration(self):
+        try:
+            if self._match(TokenType.VAR):
+                return self._var_declaration()
+            return self._statement()
+        except self.ParseError:
+            self._synchronize()
+            return None
 
     def _statement(self):
         if self._match(TokenType.PRINT):
@@ -34,6 +43,16 @@ class Parser:
         value: Expr = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return Print(value)
+
+    def _var_declaration(self):
+        name: Token = self._consume(TokenType.IDENTIFIER, "Expect variable name.")
+
+        intializer: Expr = None # type: ignore[reportAssignmentType]
+        if self._match(TokenType.EQUAL):
+            intializer = self._expression()
+
+        self._consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        return Var(name, intializer)
 
     def _expression_statement(self):
         value: Expr = self._expression()
@@ -114,7 +133,8 @@ class Parser:
             return Literal(False)
         if self._match(TokenType.NIL):
             return Literal(None)
-
+        if self._match(TokenType.IDENTIFIER):
+            return Variable(self._previous())
         if self._match(TokenType.NUMBER, TokenType.STRING):
             return Literal(self._previous().literal)
 
