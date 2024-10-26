@@ -1,6 +1,6 @@
 from typing import Final
 
-from Expr import Binary, Expr, Grouping, Literal, Unary, Variable
+from Expr import Assign, Binary, Expr, Grouping, Literal, Unary, Variable
 from Token import Token
 from TokenTypes import TokenType
 from Stmt import Expression, Stmt, Print, Var
@@ -17,12 +17,26 @@ class Parser:
         statements: list[Stmt] = []
 
         while not self._is_at_end():
-            statements.append(self._declaration()) # type: ignore[reportArgumentType]
+            statements.append(self._declaration())  # type: ignore[reportArgumentType]
 
         return statements
 
     def _expression(self):
-        return self._equality()
+        return self._assignment()
+
+    def _assignment(self) -> Expr:
+        expr: Expr = self._equality()
+
+        if self._match(TokenType.EQUAL):
+            equals: Token = self._previous()
+            value: Expr = self._assignment()
+
+            if isinstance(expr, Variable):
+                return Assign(expr.name, value)
+
+            self._error(equals, "Invalid assignment target.")
+
+        return expr
 
     def _declaration(self):
         try:
@@ -47,7 +61,7 @@ class Parser:
     def _var_declaration(self):
         name: Token = self._consume(TokenType.IDENTIFIER, "Expect variable name.")
 
-        intializer: Expr = None # type: ignore[reportAssignmentType]
+        intializer: Expr = None  # type: ignore[reportAssignmentType]
         if self._match(TokenType.EQUAL):
             intializer = self._expression()
 

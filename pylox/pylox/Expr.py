@@ -12,6 +12,9 @@ class Expr(ABC):
 
 class Visitor[R]:
     @abstractmethod
+    def visit_Assign_Expr(self, expr: Assign) -> R: ...
+
+    @abstractmethod
     def visit_Binary_Expr(self, expr: Binary) -> R: ...
 
     @abstractmethod
@@ -25,6 +28,17 @@ class Visitor[R]:
 
     @abstractmethod
     def visit_Variable_Expr(self, expr: Variable) -> R: ...
+
+
+class Assign(Expr):
+    def __init__(self, name: Token, value: Expr):
+        super().__init__()
+        self.name: Final[Token] = name
+        self.value: Final[Expr] = value
+
+    @override
+    def accept[R](self, visitor: Visitor[R]) -> R:
+        return visitor.visit_Assign_Expr(self)
 
 
 class Binary(Expr):

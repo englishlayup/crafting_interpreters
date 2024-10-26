@@ -1,5 +1,6 @@
 from typing import override
 from Expr import (
+    Assign,
     Binary,
     Expr,
     Grouping,
@@ -173,3 +174,9 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
             value = self._evaluate(stmt.initializer)
 
         self._environment.define(stmt.name.lexeme, value)
+
+    @override
+    def visit_Assign_Expr(self, expr: Assign) -> object:
+        value: object = self._evaluate(expr.value)
+        self._environment.assign(expr.name, value)
+        return value
