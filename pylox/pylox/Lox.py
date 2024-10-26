@@ -80,7 +80,7 @@ class Lox:
             print("Usage: pylox [script]", file=sys.stderr)
             sys.exit(64)
         elif len(sys.argv) == 2:
-            Lox._run_file(sys.argv[0])
+            Lox._run_file(sys.argv[1])
         else:
             Lox._run_prompt()
 
