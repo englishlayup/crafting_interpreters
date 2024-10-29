@@ -71,7 +71,7 @@ class Lox:
 
     @staticmethod
     def _report(line: int, where: str, message: str):
-        print(f"[{line}] Error{where}: {message}")
+        print(f"[{line}] Error{where}: {message}", file=sys.stderr)
         Lox._had_error = True
 
     @staticmethod
