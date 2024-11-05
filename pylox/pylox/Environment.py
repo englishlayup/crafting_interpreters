@@ -14,7 +14,7 @@ class Environment:
         self._values[name] = value
 
     def get(self, name: Token) -> object:
-        if self._values.get(name.lexeme):
+        if name.lexeme in self._values.keys():
             return self._values[name.lexeme]
         if self.enclosing:
             return self.enclosing.get(name)

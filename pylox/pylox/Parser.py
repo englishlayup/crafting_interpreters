@@ -1,4 +1,4 @@
-from typing import Final
+from typing import Callable, Final
 
 from Expr import Assign, Binary, Expr, Grouping, Literal, Unary, Variable
 from Token import Token
@@ -9,9 +9,14 @@ from Stmt import Block, Expression, Stmt, Print, Var
 class Parser:
     class ParseError(RuntimeError): ...
 
-    def __init__(self, tokens: list[Token]) -> None:
+    def __init__(
+        self,
+        tokens: list[Token],
+        parse_error: Callable[[Token, str], None],
+    ) -> None:
         self._tokens: Final[list[Token]] = tokens
         self._current: int = 0
+        self._parse_error: Final[Callable[[Token, str], None]] = parse_error
 
     def parse(self) -> list[Stmt]:
         statements: list[Stmt] = []
@@ -176,10 +181,12 @@ class Parser:
 
         raise self._error(self._peek(), message)
 
-    def _error(self, token: Token, message: str) -> ParseError:
-        from Lox import Lox
-
-        Lox.error(token.line, message)
+    def _error(
+        self,
+        token: Token,
+        message: str,
+    ) -> ParseError:
+        self._parse_error(token, message)
         return self.ParseError()
 
     def _synchronize(self) -> None:

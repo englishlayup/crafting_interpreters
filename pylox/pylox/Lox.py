@@ -36,15 +36,15 @@ class Lox:
 
     @staticmethod
     def _run(source: str):
-        scanner: Scanner = Scanner(source)
+        scanner: Scanner = Scanner(source, Lox.error)
         tokens: list[Token] = scanner.scan_tokens()
-        parser: Parser = Parser(tokens)
+        parser: Parser = Parser(tokens, Lox.error)
         statements: list[Stmt] = parser.parse()
 
         if Lox._had_error:
             return
 
-        Lox._interpreter.interpret(statements)
+        Lox._interpreter.interpret(statements, Lox.runtime_error)
 
     @overload
     @staticmethod
@@ -71,7 +71,7 @@ class Lox:
 
     @staticmethod
     def _report(line: int, where: str, message: str):
-        print(f"[{line}] Error{where}: {message}", file=sys.stderr)
+        print(f"[line {line}] Error{where}: {message}", file=sys.stderr)
         Lox._had_error = True
 
     @staticmethod

@@ -1,4 +1,4 @@
-from typing import Final, List
+from typing import Callable, Final
 from Token import Token
 from TokenTypes import TokenType
 
@@ -23,14 +23,15 @@ class Scanner:
         "while": TokenType.WHILE,
     }
 
-    def __init__(self, source: str) -> None:
+    def __init__(self, source: str, error: Callable[[int, str], None]) -> None:
         self._source: Final[str] = source
         self._tokens: Final[list[Token]] = []
         self._start = 0
         self._current = 0
         self._line = 1
+        self._error: Final[Callable[[int, str], None]] = error
 
-    def scan_tokens(self) -> List[Token]:
+    def scan_tokens(self) -> list[Token]:
         while not self._is_at_end():
             self._start = self._current
             self._scan_token()
@@ -62,8 +63,6 @@ class Scanner:
                 self._add_token(TokenType.PLUS)
             case ";":
                 self._add_token(TokenType.SEMICOLON)
-            case "/":
-                self._add_token(TokenType.SLASH)
             case "*":
                 self._add_token(TokenType.STAR)
             case "!":
@@ -100,9 +99,7 @@ class Scanner:
                 elif self._is_alpha(c):
                     self._identifier()
                 else:
-                    from Lox import Lox
-
-                    Lox.error(self._line, "Unexpected character.")
+                    self._error(self._line, "Unexpected character.")
 
     def _add_token(self, type: TokenType, literal: object = None) -> None:
         lexeme = self._source[self._start : self._current]
@@ -139,9 +136,7 @@ class Scanner:
             self._advance()
 
         if self._is_at_end():
-            from Lox import Lox
-
-            Lox.error(self._line, "Unterminated string")
+            self._error(self._line, "Unterminated string.")
             return
 
         # The closing quote

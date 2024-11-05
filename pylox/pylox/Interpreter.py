@@ -1,4 +1,4 @@
-from typing import override
+from typing import Callable, override
 from Expr import (
     Assign,
     Binary,
@@ -21,14 +21,16 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
         super().__init__()
         self._environment: Environment = Environment()
 
-    def interpret(self, statements: list[Stmt]):
+    def interpret(
+        self,
+        statements: list[Stmt],
+        runtime_error: Callable[[RuntimeError], None],
+    ):
         try:
             for statement in statements:
                 self._execute(statement)
         except RuntimeError as e:
-            from Lox import Lox
-
-            Lox.runtime_error(e)
+            runtime_error(e)
 
     def _execute(self, statement: Stmt):
         statement.accept(self)
@@ -74,11 +76,11 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
             case TokenType.PLUS:
                 if isinstance(left, float) and isinstance(right, float):
                     return left + right
-                if isinstance(left, str) or isinstance(right, str):
+                if isinstance(left, str) and isinstance(right, str):
                     return self._stringify(left) + self._stringify(right)
                 raise RuntimeError(
                     expr.operator,
-                    "Both operands must be two numbers or at least one operand has to be a string.",
+                    "Operands must be two numbers or two strings.",
                 )
             case TokenType.MINUS:
                 self._check_number_operands(expr.operator, left, right)
@@ -117,6 +119,8 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
         return None
 
     def _is_equal(self, a: object, b: object):
+        if type(a) is not type(b):
+            return False
         return a == b
 
     @override
