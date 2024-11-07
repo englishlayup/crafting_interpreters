@@ -1,6 +1,6 @@
 from typing import Callable, Final
 
-from Expr import Assign, Binary, Expr, Grouping, Literal, Unary, Variable
+from Expr import Assign, Binary, Expr, Grouping, Literal, Logical, Unary, Variable
 from Token import Token
 from TokenTypes import TokenType
 from Stmt import Block, Expression, If, Stmt, Print, Var
@@ -30,7 +30,7 @@ class Parser:
         return self._assignment()
 
     def _assignment(self) -> Expr:
-        expr: Expr = self._equality()
+        expr: Expr = self._or()
 
         if self._match(TokenType.EQUAL):
             equals: Token = self._previous()
@@ -40,6 +40,26 @@ class Parser:
                 return Assign(expr.name, value)
 
             self._error(equals, "Invalid assignment target.")
+
+        return expr
+
+    def _or(self) -> Expr:
+        expr: Expr = self._and()
+
+        if self._match(TokenType.OR):
+            operator = self._previous()
+            right = self._and()
+            expr = Logical(expr, operator, right)
+
+        return expr
+
+    def _and(self) -> Expr:
+        expr: Expr = self._equality()
+
+        if self._match(TokenType.AND):
+            operator = self._previous()
+            right = self._equality()
+            expr = Logical(expr, operator, right)
 
         return expr
 

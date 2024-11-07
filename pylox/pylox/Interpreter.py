@@ -5,6 +5,7 @@ from Expr import (
     Expr,
     Grouping,
     Literal,
+    Logical,
     Unary,
     Variable,
     Visitor as ExprVisitor,
@@ -130,6 +131,19 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
     @override
     def visit_Literal_Expr(self, expr: Literal) -> object:
         return expr.value
+
+    @override
+    def visit_Logical_Expr(self, expr: Logical) -> object:
+        left: object = self._evaluate(expr.left)
+
+        if expr.operator.type == TokenType.OR:
+            if self._is_truthy(left):
+                return left
+        else:
+            if not self._is_truthy(left):
+                return left
+
+        return self._evaluate(expr.right)
 
     @override
     def visit_Unary_Expr(self, expr: Unary) -> object:

@@ -24,6 +24,9 @@ class Visitor[R]:
     def visit_Literal_Expr(self, expr: Literal) -> R: ...
 
     @abstractmethod
+    def visit_Logical_Expr(self, expr: Logical) -> R: ...
+
+    @abstractmethod
     def visit_Unary_Expr(self, expr: Unary) -> R: ...
 
     @abstractmethod
@@ -71,6 +74,18 @@ class Literal(Expr):
     @override
     def accept[R](self, visitor: Visitor[R]) -> R:
         return visitor.visit_Literal_Expr(self)
+
+
+class Logical(Expr):
+    def __init__(self, left: Expr, operator: Token, right: Expr):
+        super().__init__()
+        self.left: Final[Expr] = left
+        self.operator: Final[Token] = operator
+        self.right: Final[Expr] = right
+
+    @override
+    def accept[R](self, visitor: Visitor[R]) -> R:
+        return visitor.visit_Logical_Expr(self)
 
 
 class Unary(Expr):
