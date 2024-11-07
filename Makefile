@@ -11,3 +11,6 @@ test:
 		-v $(PWD):/home/tester/src craftinginterpreters \
 		bash -c "dart tool/bin/test.dart chap09_control --interpreter /home/tester/src/bin/pylox" \
 		| tee test_output.log
+
+generate_ast:
+	python3 ./pylox/tool/generate_ast.py ./pylox/pylox/

@@ -28,6 +28,7 @@ def generate_ast():
         [
             "Block      : statements: list[Stmt] ",
             "Expression : expression: Expr",
+            "If         : condition: Expr, thenBranch: Stmt, elseBranch: Stmt",
             "Print      : expression: Expr",
             "Var        : name: Token, initializer: Expr",
         ],

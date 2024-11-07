@@ -12,7 +12,7 @@ from Expr import (
 from Token import Token
 from TokenTypes import TokenType
 from RuntimeError import RuntimeError
-from Stmt import Block, Expression, Print, Stmt, Var, Visitor as StmtVisitor
+from Stmt import Block, Expression, If, Print, Stmt, Var, Visitor as StmtVisitor
 from Environment import Environment
 
 
@@ -179,6 +179,14 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
     @override
     def visit_Expression_Stmt(self, stmt: Expression) -> None:
         self._evaluate(stmt.expression)
+
+    @override
+    def visit_If_Stmt(self, stmt: If) -> None:
+        if self._is_truthy(stmt.condition):
+            self._execute(stmt.thenBranch)
+        elif stmt.elseBranch:
+            self._execute(stmt.elseBranch)
+        return None
 
     @override
     def visit_Print_Stmt(self, stmt: Print) -> None:

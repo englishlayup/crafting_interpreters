@@ -19,6 +19,9 @@ class Visitor[R]:
     def visit_Expression_Stmt(self, stmt: Expression) -> R: ...
 
     @abstractmethod
+    def visit_If_Stmt(self, stmt: If) -> R: ...
+
+    @abstractmethod
     def visit_Print_Stmt(self, stmt: Print) -> R: ...
 
     @abstractmethod
@@ -43,6 +46,18 @@ class Expression(Stmt):
     @override
     def accept[R](self, visitor: Visitor[R]) -> R:
         return visitor.visit_Expression_Stmt(self)
+
+
+class If(Stmt):
+    def __init__(self, condition: Expr, thenBranch: Stmt, elseBranch: Stmt):
+        super().__init__()
+        self.condition: Final[Expr] = condition
+        self.thenBranch: Final[Stmt] = thenBranch
+        self.elseBranch: Final[Stmt] = elseBranch
+
+    @override
+    def accept[R](self, visitor: Visitor[R]) -> R:
+        return visitor.visit_If_Stmt(self)
 
 
 class Print(Stmt):

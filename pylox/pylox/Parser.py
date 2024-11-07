@@ -3,7 +3,7 @@ from typing import Callable, Final
 from Expr import Assign, Binary, Expr, Grouping, Literal, Unary, Variable
 from Token import Token
 from TokenTypes import TokenType
-from Stmt import Block, Expression, Stmt, Print, Var
+from Stmt import Block, Expression, If, Stmt, Print, Var
 
 
 class Parser:
@@ -53,12 +53,26 @@ class Parser:
             return None
 
     def _statement(self) -> Stmt:
+        if self._match(TokenType.IF):
+            return self._if_statement()
         if self._match(TokenType.PRINT):
             return self._print_statement()
         if self._match(TokenType.LEFT_BRACE):
             return Block(self._block())
 
         return self._expression_statement()
+
+    def _if_statement(self) -> Stmt:
+        self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        condition = self._expression()
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+
+        then_branch: Stmt = self._statement()
+        else_branch: Stmt = None  # type: ignore[reportAssignmentType]
+        if self._match(TokenType.ELSE):
+            else_branch = self._statement()
+
+        return If(condition, then_branch, else_branch)
 
     def _print_statement(self):
         value: Expr = self._expression()
