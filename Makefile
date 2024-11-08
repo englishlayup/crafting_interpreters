@@ -9,7 +9,7 @@ test:
 		-w /home/tester/craftinginterpreters \
 		--rm \
 		-v $(PWD):/home/tester/src craftinginterpreters \
-		bash -c "dart tool/bin/test.dart chap09_control --interpreter /home/tester/src/bin/pylox" \
+		bash -c "dart tool/bin/test.dart chap10_functions --interpreter /home/tester/src/bin/pylox" \
 		| tee test_output.log
 
 generate_ast:
