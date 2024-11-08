@@ -46,7 +46,7 @@ class Parser:
     def _or(self) -> Expr:
         expr: Expr = self._and()
 
-        if self._match(TokenType.OR):
+        while self._match(TokenType.OR):
             operator = self._previous()
             right = self._and()
             expr = Logical(expr, operator, right)
@@ -56,7 +56,7 @@ class Parser:
     def _and(self) -> Expr:
         expr: Expr = self._equality()
 
-        if self._match(TokenType.AND):
+        while self._match(TokenType.AND):
             operator = self._previous()
             right = self._equality()
             expr = Logical(expr, operator, right)
