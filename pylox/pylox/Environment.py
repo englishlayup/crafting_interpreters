@@ -22,7 +22,7 @@ class Environment:
         raise RuntimeError(name, f"Undefined variable '{name.lexeme}'.")
 
     def assign(self, name: Token, value: object):
-        if self._values.get(name.lexeme):
+        if name.lexeme in self._values.keys():
             self._values[name.lexeme] = value
             return
         if self.enclosing:

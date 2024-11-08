@@ -13,7 +13,7 @@ from Expr import (
 from Token import Token
 from TokenTypes import TokenType
 from RuntimeError import RuntimeError
-from Stmt import Block, Expression, If, Print, Stmt, Var, Visitor as StmtVisitor
+from Stmt import Block, Expression, If, Print, Stmt, Var, Visitor as StmtVisitor, While
 from Environment import Environment
 
 
@@ -214,6 +214,11 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
             value = self._evaluate(stmt.initializer)
 
         self._environment.define(stmt.name.lexeme, value)
+
+    @override
+    def visit_While_Stmt(self, stmt: While) -> None:
+        while self._is_truthy(self._evaluate(stmt.condition)):
+            self._execute(stmt.body)
 
     @override
     def visit_Assign_Expr(self, expr: Assign) -> object:

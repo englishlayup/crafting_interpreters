@@ -27,6 +27,9 @@ class Visitor[R]:
     @abstractmethod
     def visit_Var_Stmt(self, stmt: Var) -> R: ...
 
+    @abstractmethod
+    def visit_While_Stmt(self, stmt: While) -> R: ...
+
 
 class Block(Stmt):
     def __init__(self, statements: list[Stmt]):
@@ -79,3 +82,14 @@ class Var(Stmt):
     @override
     def accept[R](self, visitor: Visitor[R]) -> R:
         return visitor.visit_Var_Stmt(self)
+
+
+class While(Stmt):
+    def __init__(self, condition: Expr, body: Stmt):
+        super().__init__()
+        self.condition: Final[Expr] = condition
+        self.body: Final[Stmt] = body
+
+    @override
+    def accept[R](self, visitor: Visitor[R]) -> R:
+        return visitor.visit_While_Stmt(self)

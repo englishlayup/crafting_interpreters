@@ -1,9 +1,9 @@
-from typing import Callable, Final
+from typing import Callable, Final, Optional
 
 from Expr import Assign, Binary, Expr, Grouping, Literal, Logical, Unary, Variable
 from Token import Token
 from TokenTypes import TokenType
-from Stmt import Block, Expression, If, Stmt, Print, Var
+from Stmt import Block, Expression, If, Stmt, Print, Var, While
 
 
 class Parser:
@@ -73,6 +73,10 @@ class Parser:
             return None
 
     def _statement(self) -> Stmt:
+        if self._match(TokenType.FOR):
+            return self._for_statement()
+        if self._match(TokenType.WHILE):
+            return self._while_statement()
         if self._match(TokenType.IF):
             return self._if_statement()
         if self._match(TokenType.PRINT):
@@ -81,6 +85,42 @@ class Parser:
             return Block(self._block())
 
         return self._expression_statement()
+
+    def _for_statement(self) -> Stmt:
+        self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
+
+        initializer: Optional[Stmt]
+        if self._match(TokenType.SEMICOLON):
+            initializer = None
+        elif self._match(TokenType.VAR):
+            initializer = self._var_declaration()
+        else:
+            initializer = self._expression_statement()
+
+        condition: Optional[Expr] = None
+        if not self._check(TokenType.SEMICOLON):
+            condition = self._expression()
+        self._consume(TokenType.SEMICOLON, "Expect ';' after loop condition.")
+
+        increment: Optional[Expr] = None
+        if not self._check(TokenType.RIGHT_PAREN):
+            increment = self._expression()
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
+
+        body: Stmt = self._statement()
+
+        if increment:
+            body = Block([body, Expression(increment)])
+
+        if not condition:
+            condition = Literal(True)
+
+        body = While(condition, body)
+
+        if initializer:
+            body = Block([initializer, body])
+
+        return body
 
     def _if_statement(self) -> Stmt:
         self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
@@ -108,6 +148,14 @@ class Parser:
 
         self._consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
         return Var(name, intializer)
+
+    def _while_statement(self):
+        self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+        condition = self._expression()
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
+        body = self._statement()
+
+        return While(condition, body)
 
     def _expression_statement(self):
         value: Expr = self._expression()
