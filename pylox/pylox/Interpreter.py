@@ -184,7 +184,7 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
         if obj is None:
             return False
         if isinstance(obj, bool):
-            return bool(obj)
+            return obj
         return True
 
     def _evaluate(self, expr: Expr):
@@ -196,7 +196,7 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
 
     @override
     def visit_If_Stmt(self, stmt: If) -> None:
-        if self._is_truthy(stmt.condition):
+        if self._is_truthy(self._evaluate(stmt.condition)):
             self._execute(stmt.thenBranch)
         elif stmt.elseBranch:
             self._execute(stmt.elseBranch)
