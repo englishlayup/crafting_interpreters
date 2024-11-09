@@ -19,6 +19,9 @@ class Visitor[R]:
     def visit_Expression_Stmt(self, stmt: Expression) -> R: ...
 
     @abstractmethod
+    def visit_Function_Stmt(self, stmt: Function) -> R: ...
+
+    @abstractmethod
     def visit_If_Stmt(self, stmt: If) -> R: ...
 
     @abstractmethod
@@ -49,6 +52,18 @@ class Expression(Stmt):
     @override
     def accept[R](self, visitor: Visitor[R]) -> R:
         return visitor.visit_Expression_Stmt(self)
+
+
+class Function(Stmt):
+    def __init__(self, name: Token, params: list[Token], body: list[Stmt]):
+        super().__init__()
+        self.name: Final[Token] = name
+        self.params: Final[list[Token]] = params
+        self.body: Final[list[Stmt]] = body
+
+    @override
+    def accept[R](self, visitor: Visitor[R]) -> R:
+        return visitor.visit_Function_Stmt(self)
 
 
 class If(Stmt):

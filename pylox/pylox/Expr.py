@@ -18,6 +18,9 @@ class Visitor[R]:
     def visit_Binary_Expr(self, expr: Binary) -> R: ...
 
     @abstractmethod
+    def visit_Call_Expr(self, expr: Call) -> R: ...
+
+    @abstractmethod
     def visit_Grouping_Expr(self, expr: Grouping) -> R: ...
 
     @abstractmethod
@@ -54,6 +57,18 @@ class Binary(Expr):
     @override
     def accept[R](self, visitor: Visitor[R]) -> R:
         return visitor.visit_Binary_Expr(self)
+
+
+class Call(Expr):
+    def __init__(self, callee: Expr, paren: Token, arguments: list[Expr]):
+        super().__init__()
+        self.callee: Final[Expr] = callee
+        self.paren: Final[Token] = paren
+        self.arguments: Final[list[Expr]] = arguments
+
+    @override
+    def accept[R](self, visitor: Visitor[R]) -> R:
+        return visitor.visit_Call_Expr(self)
 
 
 class Grouping(Expr):

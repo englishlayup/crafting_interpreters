@@ -15,6 +15,7 @@ def generate_ast():
         [
             "Assign   : name: Token, value: Expr",
             "Binary   : left: Expr, operator: Token, right: Expr",
+            "Call     : callee: Expr, paren: Token, arguments: list[Expr]",
             "Grouping : expression: Expr",
             "Literal  : value: object",
             "Logical  : left: Expr, operator: Token, right: Expr",
@@ -29,6 +30,7 @@ def generate_ast():
         [
             "Block      : statements: list[Stmt] ",
             "Expression : expression: Expr",
+            "Function   : name: Token, params: list[Token], body: list[Stmt]",
             "If         : condition: Expr, thenBranch: Stmt, elseBranch: Stmt",
             "Print      : expression: Expr",
             "Var        : name: Token, initializer: Expr",

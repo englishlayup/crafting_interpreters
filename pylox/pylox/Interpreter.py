@@ -1,7 +1,9 @@
-from typing import Callable, override
+from __future__ import annotations
+from typing import TYPE_CHECKING, Callable, Final, Type, override
 from Expr import (
     Assign,
     Binary,
+    Call,
     Expr,
     Grouping,
     Literal,
@@ -16,11 +18,31 @@ from RuntimeError import RuntimeError
 from Stmt import Block, Expression, If, Print, Stmt, Var, Visitor as StmtVisitor, While
 from Environment import Environment
 
+if TYPE_CHECKING:
+    from LoxCallable import LoxCallable
+import time
+
 
 class Interpreter(ExprVisitor[object], StmtVisitor[None]):
-    def __init__(self) -> None:
+    def __init__(self, callable_interface: Type[LoxCallable]) -> None:
         super().__init__()
-        self._environment: Environment = Environment()
+        self.globals: Final[Environment] = Environment()
+        self._environment: Environment = self.globals
+        self._callable_interface: Type[LoxCallable] = callable_interface
+
+        class _NativeFnClock(self._callable_interface):
+            @override
+            def arity(self) -> int:
+                return 0
+
+            @override
+            def call(self, interpreter: Interpreter, arguments: list[object]) -> float:
+                return time.time()
+
+            def __str__(self) -> str:
+                return "<native fn>"
+
+        self.globals.define("clock", _NativeFnClock)
 
     def interpret(
         self,
@@ -118,6 +140,27 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
 
         # Unreachable
         return None
+
+    @override
+    def visit_Call_Expr(self, expr: Call) -> object:
+        callee: object = self._evaluate(expr.callee)
+
+        arguments: list[object] = []
+        for argument in expr.arguments:
+            arguments.append(self._evaluate(argument))
+
+        if not isinstance(callee, self._callable_interface):
+            raise RuntimeError(expr.paren, "Can only call function and classes.")
+
+        function: LoxCallable = callee
+
+        if len(arguments) < function.arity():
+            raise RuntimeError(
+                expr.paren,
+                f"Expect {function.arity()} arguments but got {len(arguments)}.",
+            )
+
+        return function.call(self, arguments)
 
     def _is_equal(self, a: object, b: object):
         if type(a) is not type(b):
