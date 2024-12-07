@@ -3,7 +3,7 @@ from typing import Callable, Final, Optional
 from Expr import Assign, Binary, Call, Expr, Grouping, Literal, Logical, Unary, Variable
 from Token import Token
 from TokenTypes import TokenType
-from Stmt import Block, Expression, Function, If, Stmt, Print, Var, While
+from Stmt import Block, Expression, Function, If, Return, Stmt, Print, Var, While
 
 
 class Parser:
@@ -98,6 +98,8 @@ class Parser:
     def _statement(self) -> Stmt:
         if self._match(TokenType.FOR):
             return self._for_statement()
+        if self._match(TokenType.RETURN):
+            return self._return_statement()
         if self._match(TokenType.WHILE):
             return self._while_statement()
         if self._match(TokenType.IF):
@@ -161,6 +163,15 @@ class Parser:
         value: Expr = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return Print(value)
+
+    def _return_statement(self) -> Stmt:
+        keyword: Token = self._previous()
+        value: Expr = None  # type: ignore[reportAssignmentType]
+        if not self._check(TokenType.SEMICOLON):
+            value = self._expression()
+
+        self._consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        return Return(keyword, value)
 
     def _var_declaration(self):
         name: Token = self._consume(TokenType.IDENTIFIER, "Expect variable name.")

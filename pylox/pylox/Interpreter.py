@@ -15,8 +15,20 @@ from Expr import (
 from Token import Token
 from TokenTypes import TokenType
 from RuntimeError import RuntimeError
-from Stmt import Block, Expression, Function, If, Print, Stmt, Var, Visitor as StmtVisitor, While
+from Stmt import (
+    Block,
+    Expression,
+    Function,
+    If,
+    Print,
+    Return as StmtReturn,
+    Stmt,
+    Var,
+    Visitor as StmtVisitor,
+    While,
+)
 from Environment import Environment
+from Return import Return
 
 if TYPE_CHECKING:
     from LoxCallable import LoxCallable
@@ -25,7 +37,9 @@ import time
 
 
 class Interpreter(ExprVisitor[object], StmtVisitor[None]):
-    def __init__(self, callable_interface: Type[LoxCallable], function_class: Type[LoxFunction]) -> None:
+    def __init__(
+        self, callable_interface: Type[LoxCallable], function_class: Type[LoxFunction]
+    ) -> None:
         super().__init__()
         self.globals: Final[Environment] = Environment()
         self._environment: Environment = self.globals
@@ -44,7 +58,7 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
             def __str__(self) -> str:
                 return "<native fn>"
 
-        self.globals.define("clock", _NativeFnClock)
+        self.globals.define("clock", _NativeFnClock())
 
     def interpret(
         self,
@@ -152,14 +166,14 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
             arguments.append(self._evaluate(argument))
 
         if not isinstance(callee, self._callable_interface):
-            raise RuntimeError(expr.paren, "Can only call function and classes.")
+            raise RuntimeError(expr.paren, "Can only call functions and classes.")
 
         function: LoxCallable = callee
 
-        if len(arguments) < function.arity():
+        if len(arguments) != function.arity():
             raise RuntimeError(
                 expr.paren,
-                f"Expect {function.arity()} arguments but got {len(arguments)}.",
+                f"Expected {function.arity()} arguments but got {len(arguments)}.",
             )
 
         return function.call(self, arguments)
@@ -239,8 +253,9 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
     def visit_Expression_Stmt(self, stmt: Expression) -> None:
         self._evaluate(stmt.expression)
 
+    @override
     def visit_Function_Stmt(self, stmt: Function) -> None:
-        function = self._function_class(stmt)
+        function = self._function_class(stmt, self._environment)
         self._environment.define(stmt.name.lexeme, function)
 
     @override
@@ -255,6 +270,14 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
     def visit_Print_Stmt(self, stmt: Print) -> None:
         value: object = self._evaluate(stmt.expression)
         print(self._stringify(value))
+
+    @override
+    def visit_Return_Stmt(self, stmt: StmtReturn) -> None:
+        value: object = None
+        if stmt.value:
+            value = self._evaluate(stmt.value)
+
+        raise Return(value)
 
     @override
     def visit_Var_Stmt(self, stmt: Var) -> None:

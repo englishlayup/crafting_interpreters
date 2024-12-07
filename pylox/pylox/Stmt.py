@@ -28,6 +28,9 @@ class Visitor[R]:
     def visit_Print_Stmt(self, stmt: Print) -> R: ...
 
     @abstractmethod
+    def visit_Return_Stmt(self, stmt: Return) -> R: ...
+
+    @abstractmethod
     def visit_Var_Stmt(self, stmt: Var) -> R: ...
 
     @abstractmethod
@@ -86,6 +89,17 @@ class Print(Stmt):
     @override
     def accept[R](self, visitor: Visitor[R]) -> R:
         return visitor.visit_Print_Stmt(self)
+
+
+class Return(Stmt):
+    def __init__(self, keyword: Token, value: Expr):
+        super().__init__()
+        self.keyword: Final[Token] = keyword
+        self.value: Final[Expr] = value
+
+    @override
+    def accept[R](self, visitor: Visitor[R]) -> R:
+        return visitor.visit_Return_Stmt(self)
 
 
 class Var(Stmt):
