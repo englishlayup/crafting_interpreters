@@ -15,20 +15,22 @@ from Expr import (
 from Token import Token
 from TokenTypes import TokenType
 from RuntimeError import RuntimeError
-from Stmt import Block, Expression, If, Print, Stmt, Var, Visitor as StmtVisitor, While
+from Stmt import Block, Expression, Function, If, Print, Stmt, Var, Visitor as StmtVisitor, While
 from Environment import Environment
 
 if TYPE_CHECKING:
     from LoxCallable import LoxCallable
+    from LoxFunction import LoxFunction
 import time
 
 
 class Interpreter(ExprVisitor[object], StmtVisitor[None]):
-    def __init__(self, callable_interface: Type[LoxCallable]) -> None:
+    def __init__(self, callable_interface: Type[LoxCallable], function_class: Type[LoxFunction]) -> None:
         super().__init__()
         self.globals: Final[Environment] = Environment()
         self._environment: Environment = self.globals
         self._callable_interface: Type[LoxCallable] = callable_interface
+        self._function_class: Type[LoxFunction] = function_class
 
         class _NativeFnClock(self._callable_interface):
             @override
@@ -58,7 +60,7 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
     def _execute(self, statement: Stmt):
         statement.accept(self)
 
-    def _execute_block(self, statements: list[Stmt], environment: Environment):
+    def execute_block(self, statements: list[Stmt], environment: Environment):
         previous: Environment = self._environment
         try:
             self._environment = environment
@@ -70,7 +72,7 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
 
     @override
     def visit_Block_Stmt(self, stmt: Block) -> None:
-        self._execute_block(stmt.statements, Environment(self._environment))
+        self.execute_block(stmt.statements, Environment(self._environment))
 
     def _stringify(self, obj: object):
         if obj is None:
@@ -236,6 +238,10 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
     @override
     def visit_Expression_Stmt(self, stmt: Expression) -> None:
         self._evaluate(stmt.expression)
+
+    def visit_Function_Stmt(self, stmt: Function) -> None:
+        function = self._function_class(stmt)
+        self._environment.define(stmt.name.lexeme, function)
 
     @override
     def visit_If_Stmt(self, stmt: If) -> None:

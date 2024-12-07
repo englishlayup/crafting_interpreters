@@ -10,10 +10,11 @@ from Parser import Parser
 from Scanner import Scanner
 from Stmt import Stmt
 from LoxCallable import LoxCallable
+from LoxFunction import LoxFunction
 
 
 class Lox:
-    _interpreter: Interpreter = Interpreter(LoxCallable)
+    _interpreter: Interpreter = Interpreter(LoxCallable, LoxFunction)
     _had_error = False
     _had_runtime_error = False
 
