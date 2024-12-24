@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Callable, Final, Type, override
+from typing import TYPE_CHECKING, Callable, Final, Optional, Type, override
 from Expr import (
     Assign,
     Binary,
@@ -43,6 +43,7 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
         super().__init__()
         self.globals: Final[Environment] = Environment()
         self._environment: Environment = self.globals
+        self._locals: Final[dict[Expr, int]] = {}
         self._callable_interface: Type[LoxCallable] = callable_interface
         self._function_class: Type[LoxFunction] = function_class
 
@@ -53,6 +54,8 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
 
             @override
             def call(self, interpreter: Interpreter, arguments: list[object]) -> float:
+                _ = interpreter
+                _ = arguments
                 return time.time()
 
             def __str__(self) -> str:
@@ -73,6 +76,9 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
 
     def _execute(self, statement: Stmt):
         statement.accept(self)
+
+    def resolve(self, expr: Expr, depth: int):
+        self._locals[expr] = depth
 
     def execute_block(self, statements: list[Stmt], environment: Environment):
         previous: Environment = self._environment
@@ -222,7 +228,14 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
 
     @override
     def visit_Variable_Expr(self, expr: Variable) -> object:
-        return self._environment.get(expr.name)
+        return self._look_up_variable(expr.name, expr)
+
+    def _look_up_variable(self, name: Token, expr: Expr) -> object:
+        distance: Optional[int] = self._locals.get(expr)
+        if distance is not None:
+            return self._environment.get_at(distance, name.lexeme)
+        else:
+            return self.globals.get(name)
 
     def _check_number_operand(self, operator: Token, operand: object) -> None:
         if isinstance(operand, float):
@@ -295,5 +308,9 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
     @override
     def visit_Assign_Expr(self, expr: Assign) -> object:
         value: object = self._evaluate(expr.value)
-        self._environment.assign(expr.name, value)
+        distance: Optional[int] = self._locals.get(expr)
+        if distance is not None:
+            self._environment.assign_at(distance, expr.name, value)
+        else:
+            self.globals.assign(expr.name, value)
         return value

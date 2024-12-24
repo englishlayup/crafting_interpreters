@@ -11,6 +11,7 @@ from Scanner import Scanner
 from Stmt import Stmt
 from LoxCallable import LoxCallable
 from LoxFunction import LoxFunction
+from Resolver import Resolver
 
 
 class Lox:
@@ -42,6 +43,12 @@ class Lox:
         tokens: list[Token] = scanner.scan_tokens()
         parser: Parser = Parser(tokens, Lox.error)
         statements: list[Stmt] = parser.parse()
+
+        if Lox._had_error:
+            return
+
+        resolver: Resolver = Resolver(Lox._interpreter, Lox.error)
+        resolver.resolve(statements)
 
         if Lox._had_error:
             return
