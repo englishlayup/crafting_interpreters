@@ -3,7 +3,7 @@ from typing import Callable, Final, Optional
 from Expr import Assign, Binary, Call, Expr, Grouping, Literal, Logical, Unary, Variable
 from Token import Token
 from TokenTypes import TokenType
-from Stmt import Block, Expression, Function, If, Return, Stmt, Print, Var, While
+from Stmt import Block, Class, Expression, Function, If, Return, Stmt, Print, Var, While
 
 
 class Parser:
@@ -65,6 +65,8 @@ class Parser:
 
     def _declaration(self):
         try:
+            if self._match(TokenType.CLASS):
+                return self._class_declaration()
             if self._match(TokenType.FUN):
                 return self._function("function")
             if self._match(TokenType.VAR):
@@ -73,6 +75,17 @@ class Parser:
         except self.ParseError:
             self._synchronize()
             return None
+
+    def _class_declaration(self) -> Class:
+        name = self._consume(TokenType.IDENTIFIER, "Expect class name.")
+        self._consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
+
+        methods: list[Function] = []
+        while not self._check(TokenType.RIGHT_BRACE) and not self._is_at_end():
+            methods.append(self._function("method"))
+
+        self._consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.")
+        return Class(name, methods)
 
     def _function(self, kind: str) -> Function:
         name: Token = self._consume(TokenType.IDENTIFIER, f"Expect {kind} name.")

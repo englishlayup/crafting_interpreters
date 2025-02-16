@@ -17,6 +17,7 @@ from TokenTypes import TokenType
 from RuntimeError import RuntimeError
 from Stmt import (
     Block,
+    Class,
     Expression,
     Function,
     If,
@@ -29,6 +30,7 @@ from Stmt import (
 )
 from Environment import Environment
 from Return import Return
+from LoxClass import LoxClass
 
 if TYPE_CHECKING:
     from LoxCallable import LoxCallable
@@ -93,6 +95,12 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
     @override
     def visit_Block_Stmt(self, stmt: Block) -> None:
         self.execute_block(stmt.statements, Environment(self._environment))
+
+    @override
+    def visit_Class_Stmt(self, stmt: Class) -> None:
+        self._environment.define(stmt.name.lexeme, None)
+        klass = LoxClass(stmt.name.lexeme)
+        self._environment.assign(stmt.name, klass)
 
     def _stringify(self, obj: object):
         if obj is None:

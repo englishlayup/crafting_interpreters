@@ -14,6 +14,7 @@ from Expr import (
 )
 from Stmt import (
     Block,
+    Class,
     Expression,
     Function,
     If,
@@ -49,6 +50,11 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
         self._begin_scope()
         self.resolve(stmt.statements)
         self._end_scope()
+
+    @override
+    def visit_Class_Stmt(self, stmt: Class) -> None:
+        self._declare(stmt.name)
+        self._define(stmt.name)
 
     @override
     def visit_Var_Stmt(self, stmt: Var) -> None:

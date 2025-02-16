@@ -16,6 +16,9 @@ class Visitor[R]:
     def visit_Block_Stmt(self, stmt: Block) -> R: ...
 
     @abstractmethod
+    def visit_Class_Stmt(self, stmt: Class) -> R: ...
+
+    @abstractmethod
     def visit_Expression_Stmt(self, stmt: Expression) -> R: ...
 
     @abstractmethod
@@ -45,6 +48,17 @@ class Block(Stmt):
     @override
     def accept[R](self, visitor: Visitor[R]) -> R:
         return visitor.visit_Block_Stmt(self)
+
+
+class Class(Stmt):
+    def __init__(self, name: Token, methods: list[Function]):
+        super().__init__()
+        self.name: Final[Token] = name
+        self.methods: Final[list[Function]] = methods
+
+    @override
+    def accept[R](self, visitor: Visitor[R]) -> R:
+        return visitor.visit_Class_Stmt(self)
 
 
 class Expression(Stmt):

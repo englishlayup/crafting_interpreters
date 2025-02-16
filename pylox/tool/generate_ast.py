@@ -28,7 +28,8 @@ def generate_ast():
         output_dir,
         "Stmt",
         [
-            "Block      : statements: list[Stmt] ",
+            "Block      : statements: list[Stmt]",
+            "Class      : name: Token, methods: list[Function]",
             "Expression : expression: Expr",
             "Function   : name: Token, params: list[Token], body: list[Stmt]",
             "If         : condition: Expr, thenBranch: Stmt, elseBranch: Stmt",
