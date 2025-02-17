@@ -12,10 +12,11 @@ from Stmt import Stmt
 from LoxCallable import LoxCallable
 from LoxFunction import LoxFunction
 from Resolver import Resolver
+from LoxClass import LoxClass
 
 
 class Lox:
-    _interpreter: Interpreter = Interpreter(LoxCallable, LoxFunction)
+    _interpreter: Interpreter = Interpreter(LoxCallable, LoxFunction, LoxClass)
     _had_error = False
     _had_runtime_error = False
 

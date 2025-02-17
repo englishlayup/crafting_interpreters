@@ -1,6 +1,17 @@
 from typing import Callable, Final, Optional
 
-from Expr import Assign, Binary, Call, Expr, Grouping, Literal, Logical, Unary, Variable
+from Expr import (
+    Assign,
+    Binary,
+    Call,
+    Expr,
+    Get,
+    Grouping,
+    Literal,
+    Logical,
+    Unary,
+    Variable,
+)
 from Token import Token
 from TokenTypes import TokenType
 from Stmt import Block, Class, Expression, Function, If, Return, Stmt, Print, Var, While
@@ -288,6 +299,11 @@ class Parser:
         while True:
             if self._match(TokenType.LEFT_PAREN):
                 expr = self._finish_call(expr)
+            elif self._match(TokenType.DOT):
+                name = self._consume(
+                    TokenType.IDENTIFIER, "Expect property name after '.'."
+                )
+                expr = Get(expr, name)
             else:
                 break
 

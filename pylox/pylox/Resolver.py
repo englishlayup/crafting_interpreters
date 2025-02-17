@@ -5,6 +5,7 @@ from Expr import (
     Binary,
     Call,
     Expr,
+    Get,
     Grouping,
     Literal,
     Logical,
@@ -118,6 +119,10 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
         self._resolve(expr.callee)
         for argument in expr.arguments:
             self._resolve(argument)
+
+    @override
+    def visit_Get_Expr(self, expr: Get) -> None:
+        self._resolve(expr.object)
 
     @override
     def visit_Grouping_Expr(self, expr: Grouping) -> None:

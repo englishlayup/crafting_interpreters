@@ -5,6 +5,7 @@ from Expr import (
     Binary,
     Call,
     Expr,
+    Get,
     Grouping,
     Literal,
     Logical,
@@ -30,17 +31,22 @@ from Stmt import (
 )
 from Environment import Environment
 from Return import Return
-from LoxClass import LoxClass
 
 if TYPE_CHECKING:
     from LoxCallable import LoxCallable
     from LoxFunction import LoxFunction
+    from LoxClass import LoxClass
+    from LoxInstance import LoxInstance
 import time
 
 
 class Interpreter(ExprVisitor[object], StmtVisitor[None]):
     def __init__(
-        self, callable_interface: Type[LoxCallable], function_class: Type[LoxFunction]
+            self,
+            callable_interface: Type[LoxCallable],
+            function_class: Type[LoxFunction],
+            klass_class: Type[LoxClass],
+            instance_class: Type[LoxInstance],
     ) -> None:
         super().__init__()
         self.globals: Final[Environment] = Environment()
@@ -48,6 +54,8 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
         self._locals: Final[dict[Expr, int]] = {}
         self._callable_interface: Type[LoxCallable] = callable_interface
         self._function_class: Type[LoxFunction] = function_class
+        self._klass_class: Type[LoxClass] = klass_class
+        self._instance_class: Type[LoxInstance] = instance_class
 
         class _NativeFnClock(self._callable_interface):
             @override
@@ -99,7 +107,7 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
     @override
     def visit_Class_Stmt(self, stmt: Class) -> None:
         self._environment.define(stmt.name.lexeme, None)
-        klass = LoxClass(stmt.name.lexeme)
+        klass = self._klass_class(stmt.name.lexeme)
         self._environment.assign(stmt.name, klass)
 
     def _stringify(self, obj: object):
@@ -196,6 +204,14 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
         if type(a) is not type(b):
             return False
         return a == b
+
+    @override
+    def visit_Get_Expr(self, expr: Get) -> object:
+        obj: object = self._evaluate(expr)
+        if isinstance(obj, self._instance_class):
+            return self._instance_class(obj).get(expr.name)
+
+        raise RuntimeError(expr.name, "Only instances have properties.")
 
     @override
     def visit_Grouping_Expr(self, expr: Grouping) -> object:
