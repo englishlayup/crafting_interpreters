@@ -1,8 +1,9 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, Optional
 from RuntimeError import RuntimeError
 
 from Token import Token
+from LoxFunction import LoxFunction
 
 
 if TYPE_CHECKING:
@@ -21,4 +22,12 @@ class LoxInstance:
         if name.lexeme in self._fields:
             return self._fields[name.lexeme]
 
+        method: Optional[LoxFunction] = self._klass.find_method(name.lexeme)
+
+        if method is not None:
+            return method
+
         raise RuntimeError(name, f"Undefined property '{name.lexeme}'.")
+
+    def set(self, name: Token, value: object):
+        self._fields[name.lexeme] = value

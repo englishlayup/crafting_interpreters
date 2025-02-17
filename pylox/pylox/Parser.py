@@ -9,6 +9,7 @@ from Expr import (
     Grouping,
     Literal,
     Logical,
+    Set,
     Unary,
     Variable,
 )
@@ -49,6 +50,8 @@ class Parser:
 
             if isinstance(expr, Variable):
                 return Assign(expr.name, value)
+            elif isinstance(expr, Get):
+                return Set(expr.object, expr.name, value)
 
             self._error(equals, "Invalid assignment target.")
 

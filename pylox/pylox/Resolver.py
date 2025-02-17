@@ -9,6 +9,7 @@ from Expr import (
     Grouping,
     Literal,
     Logical,
+    Set,
     Unary,
     Variable,
     Visitor as ExprVistor,
@@ -33,6 +34,7 @@ from Token import Token
 class FunctionType(Enum):
     NONE = auto()
     FUNCTION = auto()
+    METHOD = auto()
 
 
 class Resolver(ExprVistor[None], StmtVisitor[None]):
@@ -56,6 +58,10 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
     def visit_Class_Stmt(self, stmt: Class) -> None:
         self._declare(stmt.name)
         self._define(stmt.name)
+
+        for method in stmt.methods:
+            declaration = FunctionType.METHOD
+            self._resolve_function(method, declaration)
 
     @override
     def visit_Var_Stmt(self, stmt: Var) -> None:
@@ -123,6 +129,11 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
     @override
     def visit_Get_Expr(self, expr: Get) -> None:
         self._resolve(expr.object)
+
+    @override
+    def visit_Set_Expr(self, expr: Set) -> None:
+        self._resolve(expr.object)
+        self._resolve(expr.value)
 
     @override
     def visit_Grouping_Expr(self, expr: Grouping) -> None:

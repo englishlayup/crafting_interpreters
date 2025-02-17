@@ -9,6 +9,7 @@ from Expr import (
     Grouping,
     Literal,
     Logical,
+    Set,
     Unary,
     Variable,
     Visitor as ExprVisitor,
@@ -42,11 +43,11 @@ import time
 
 class Interpreter(ExprVisitor[object], StmtVisitor[None]):
     def __init__(
-            self,
-            callable_interface: Type[LoxCallable],
-            function_class: Type[LoxFunction],
-            klass_class: Type[LoxClass],
-            instance_class: Type[LoxInstance],
+        self,
+        callable_interface: Type[LoxCallable],
+        function_class: Type[LoxFunction],
+        klass_class: Type[LoxClass],
+        instance_class: Type[LoxInstance],
     ) -> None:
         super().__init__()
         self.globals: Final[Environment] = Environment()
@@ -107,7 +108,11 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
     @override
     def visit_Class_Stmt(self, stmt: Class) -> None:
         self._environment.define(stmt.name.lexeme, None)
-        klass = self._klass_class(stmt.name.lexeme)
+        methods: dict[str, LoxFunction] = {}
+        for method in stmt.methods:
+            function = self._function_class(method, self._environment)
+            methods[method.name.lexeme] = function
+        klass = self._klass_class(stmt.name.lexeme, methods)
         self._environment.assign(stmt.name, klass)
 
     def _stringify(self, obj: object):
@@ -207,9 +212,9 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
 
     @override
     def visit_Get_Expr(self, expr: Get) -> object:
-        obj: object = self._evaluate(expr)
+        obj: object = self._evaluate(expr.object)
         if isinstance(obj, self._instance_class):
-            return self._instance_class(obj).get(expr.name)
+            return obj.get(expr.name)
 
         raise RuntimeError(expr.name, "Only instances have properties.")
 
@@ -233,6 +238,17 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
                 return left
 
         return self._evaluate(expr.right)
+
+    @override
+    def visit_Set_Expr(self, expr: Set) -> object:
+        obj: object = self._evaluate(expr.object)
+
+        if not isinstance(obj, self._instance_class):
+            raise RuntimeError(expr.name, "Only instances have fields.")
+
+        value: object = self._evaluate(expr.value)
+        obj.set(expr.name, value)
+        return value
 
     @override
     def visit_Unary_Expr(self, expr: Unary) -> object:

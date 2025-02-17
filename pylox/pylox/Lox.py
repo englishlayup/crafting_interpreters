@@ -13,10 +13,13 @@ from LoxCallable import LoxCallable
 from LoxFunction import LoxFunction
 from Resolver import Resolver
 from LoxClass import LoxClass
+from LoxInstance import LoxInstance
 
 
 class Lox:
-    _interpreter: Interpreter = Interpreter(LoxCallable, LoxFunction, LoxClass)
+    _interpreter: Interpreter = Interpreter(
+        LoxCallable, LoxFunction, LoxClass, LoxInstance
+    )
     _had_error = False
     _had_runtime_error = False
 
