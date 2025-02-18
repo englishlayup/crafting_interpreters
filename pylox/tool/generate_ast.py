@@ -22,6 +22,7 @@ def generate_ast():
             "Logical  : left: Expr, operator: Token, right: Expr",
             "Set      : object: Expr, name: Token, value: Expr",
             "Unary    : operator: Token, right: Expr",
+            "This     : keyword: Token",
             "Variable : name: Token",
         ],
     )

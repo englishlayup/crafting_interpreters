@@ -10,6 +10,7 @@ from Expr import (
     Literal,
     Logical,
     Set,
+    This,
     Unary,
     Variable,
     Visitor as ExprVisitor,
@@ -249,6 +250,10 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
         value: object = self._evaluate(expr.value)
         obj.set(expr.name, value)
         return value
+
+    @override
+    def visit_This_Expr(self, expr: This) -> object:
+        return self._look_up_variable(expr.keyword, expr)
 
     @override
     def visit_Unary_Expr(self, expr: Unary) -> object:

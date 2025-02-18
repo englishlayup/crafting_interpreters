@@ -10,6 +10,7 @@ from Expr import (
     Literal,
     Logical,
     Set,
+    This,
     Unary,
     Variable,
     Visitor as ExprVistor,
@@ -59,9 +60,14 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
         self._declare(stmt.name)
         self._define(stmt.name)
 
+        self._begin_scope()
+        self._scopes[-1]["this"] = True
+
         for method in stmt.methods:
             declaration = FunctionType.METHOD
             self._resolve_function(method, declaration)
+
+        self._end_scope()
 
     @override
     def visit_Var_Stmt(self, stmt: Var) -> None:
@@ -134,6 +140,10 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
     def visit_Set_Expr(self, expr: Set) -> None:
         self._resolve(expr.object)
         self._resolve(expr.value)
+
+    @override
+    def visit_This_Expr(self, expr: This) -> None:
+        self._resolve_local(expr, expr.keyword)
 
     @override
     def visit_Grouping_Expr(self, expr: Grouping) -> None:

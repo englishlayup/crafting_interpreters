@@ -39,6 +39,9 @@ class Visitor[R]:
     def visit_Unary_Expr(self, expr: Unary) -> R: ...
 
     @abstractmethod
+    def visit_This_Expr(self, expr: This) -> R: ...
+
+    @abstractmethod
     def visit_Variable_Expr(self, expr: Variable) -> R: ...
 
 
@@ -141,6 +144,16 @@ class Unary(Expr):
     @override
     def accept[R](self, visitor: Visitor[R]) -> R:
         return visitor.visit_Unary_Expr(self)
+
+
+class This(Expr):
+    def __init__(self, keyword: Token):
+        super().__init__()
+        self.keyword: Final[Token] = keyword
+
+    @override
+    def accept[R](self, visitor: Visitor[R]) -> R:
+        return visitor.visit_This_Expr(self)
 
 
 class Variable(Expr):

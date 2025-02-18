@@ -5,6 +5,7 @@ from LoxCallable import LoxCallable
 from Stmt import Function
 from Environment import Environment
 from Return import Return
+from LoxInstance import LoxInstance
 
 
 class LoxFunction(LoxCallable):
@@ -12,6 +13,11 @@ class LoxFunction(LoxCallable):
         super().__init__()
         self._closure: Final[Environment] = closure
         self._declaration: Final[Function] = declaration
+
+    def bind(self, instance: LoxInstance):
+        environment = Environment(self._closure)
+        environment.define("this", instance)
+        return LoxFunction(self._declaration, environment)
 
     def call(
         self, interpreter: Interpreter, arguments: list[object]

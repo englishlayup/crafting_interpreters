@@ -3,11 +3,11 @@ from typing import TYPE_CHECKING, Final, Optional
 from RuntimeError import RuntimeError
 
 from Token import Token
-from LoxFunction import LoxFunction
 
 
 if TYPE_CHECKING:
     from LoxClass import LoxClass
+    from LoxFunction import LoxFunction
 
 
 class LoxInstance:
@@ -23,6 +23,8 @@ class LoxInstance:
             return self._fields[name.lexeme]
 
         method: Optional[LoxFunction] = self._klass.find_method(name.lexeme)
+        if method is not None:
+            method.bind(self)
 
         if method is not None:
             return method
