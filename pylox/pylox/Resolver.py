@@ -32,11 +32,14 @@ from Interpreter import Interpreter
 from Token import Token
 
 
-class FunctionType(Enum):
+class _FunctionType(Enum):
     NONE = auto()
     FUNCTION = auto()
     METHOD = auto()
 
+class _ClassType(Enum):
+    NONE = auto()
+    CLASS = auto()
 
 class Resolver(ExprVistor[None], StmtVisitor[None]):
     def __init__(
@@ -47,7 +50,8 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
         self._interpreter: Final[Interpreter] = interpreter
         self._scopes: Final[list[dict[str, bool]]] = []
         self._error: Callable[[Token, str], None] = error
-        self._current_function: FunctionType = FunctionType.NONE
+        self._current_function: _FunctionType = _FunctionType.NONE
+        self._current_class: _ClassType = _ClassType.NONE
 
     @override
     def visit_Block_Stmt(self, stmt: Block) -> None:
@@ -57,6 +61,8 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
 
     @override
     def visit_Class_Stmt(self, stmt: Class) -> None:
+        enclosing_class: _ClassType = self._current_class
+        self._current_class = _ClassType.CLASS
         self._declare(stmt.name)
         self._define(stmt.name)
 
@@ -64,10 +70,11 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
         self._scopes[-1]["this"] = True
 
         for method in stmt.methods:
-            declaration = FunctionType.METHOD
+            declaration = _FunctionType.METHOD
             self._resolve_function(method, declaration)
 
         self._end_scope()
+        self._current_class = enclosing_class
 
     @override
     def visit_Var_Stmt(self, stmt: Var) -> None:
@@ -92,7 +99,7 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
     def visit_Function_Stmt(self, stmt: Function) -> None:
         self._declare(stmt.name)
         self._define(stmt.name)
-        self._resolve_function(stmt, FunctionType.FUNCTION)
+        self._resolve_function(stmt, _FunctionType.FUNCTION)
 
     @override
     def visit_Expression_Stmt(self, stmt: Expression) -> None:
@@ -111,7 +118,7 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
 
     @override
     def visit_Return_Stmt(self, stmt: Return) -> None:
-        if self._current_function == FunctionType.NONE:
+        if self._current_function == _FunctionType.NONE:
             self._error(stmt.keyword, "Can't return from top-level code.")
         if stmt.value:
             self._resolve(stmt.value)
@@ -143,6 +150,9 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
 
     @override
     def visit_This_Expr(self, expr: This) -> None:
+        if self._current_class == _ClassType.NONE:
+            self._error(expr.keyword, "Can't use 'this' outside of a class.")
+            return
         self._resolve_local(expr, expr.keyword)
 
     @override
@@ -195,8 +205,8 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
                 self._interpreter.resolve(expr, len(self._scopes) - 1 - i)
                 return
 
-    def _resolve_function(self, function: Function, function_type: FunctionType):
-        enclosing_function: FunctionType = self._current_function
+    def _resolve_function(self, function: Function, function_type: _FunctionType):
+        enclosing_function: _FunctionType = self._current_function
         self._current_function = function_type
         self._begin_scope()
         for param in function.params:
