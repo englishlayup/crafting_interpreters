@@ -35,6 +35,7 @@ from Token import Token
 class _FunctionType(Enum):
     NONE = auto()
     FUNCTION = auto()
+    INITIALIZER = auto()
     METHOD = auto()
 
 class _ClassType(Enum):
@@ -71,6 +72,8 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
 
         for method in stmt.methods:
             declaration = _FunctionType.METHOD
+            if method.name.lexeme == "init":
+                declaration = _FunctionType.INITIALIZER
             self._resolve_function(method, declaration)
 
         self._end_scope()
@@ -121,6 +124,8 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
         if self._current_function == _FunctionType.NONE:
             self._error(stmt.keyword, "Can't return from top-level code.")
         if stmt.value:
+            if self._current_function == _FunctionType.INITIALIZER:
+                self._error(stmt.keyword, "Can't return a value from an initializer.")
             self._resolve(stmt.value)
 
     @override

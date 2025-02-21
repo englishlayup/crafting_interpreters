@@ -26,8 +26,14 @@ class LoxClass(LoxCallable):
         self, interpreter: Interpreter, arguments: list[object]
     ) -> Optional[object]:
         instance: LoxInstance = LoxInstance(self)
+        initializer: Optional[LoxFunction] = self.find_method("init")
+        if initializer is not None:
+            initializer.bind(instance).call(interpreter, arguments)
         return instance
 
     @override
     def arity(self) -> int:
-        return 0
+        initializer: Optional[LoxFunction] = self.find_method("init")
+        if initializer is None:
+            return 0
+        return initializer.arity()
