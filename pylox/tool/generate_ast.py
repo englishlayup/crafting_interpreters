@@ -21,6 +21,7 @@ def generate_ast():
             "Literal  : value: object",
             "Logical  : left: Expr, operator: Token, right: Expr",
             "Set      : object: Expr, name: Token, value: Expr",
+            "Super    : keyword: Token, method: Token",
             "Unary    : operator: Token, right: Expr",
             "This     : keyword: Token",
             "Variable : name: Token",
@@ -32,7 +33,7 @@ def generate_ast():
         "Stmt",
         [
             "Block      : statements: list[Stmt]",
-            "Class      : name: Token, methods: list[Function]",
+            "Class      : name: Token, super_class: Optional[Variable], methods: list[Function]",
             "Expression : expression: Expr",
             "Function   : name: Token, params: list[Token], body: list[Stmt]",
             "If         : condition: Expr, thenBranch: Stmt, elseBranch: Stmt",

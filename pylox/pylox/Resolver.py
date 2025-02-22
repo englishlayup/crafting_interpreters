@@ -38,9 +38,11 @@ class _FunctionType(Enum):
     INITIALIZER = auto()
     METHOD = auto()
 
+
 class _ClassType(Enum):
     NONE = auto()
     CLASS = auto()
+
 
 class Resolver(ExprVistor[None], StmtVisitor[None]):
     def __init__(
@@ -66,6 +68,12 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
         self._current_class = _ClassType.CLASS
         self._declare(stmt.name)
         self._define(stmt.name)
+
+        if stmt.super_class is not None and stmt.name == stmt.super_class.name:
+            self._error(stmt.super_class.name, "A class can't inherit from itself.")
+
+        if stmt.super_class is not None:
+            self._resolve(stmt.super_class)
 
         self._begin_scope()
         self._scopes[-1]["this"] = True

@@ -8,7 +8,13 @@ from LoxFunction import LoxFunction
 
 
 class LoxClass(LoxCallable):
-    def __init__(self, name: str, methods: dict[str, LoxFunction]) -> None:
+    def __init__(
+        self,
+        name: str,
+        super_class: Optional[LoxClass],
+        methods: dict[str, LoxFunction],
+    ) -> None:
+        self.super_class: Final[Optional[LoxClass]] = super_class
         self.name: Final[str] = name
         self._methods: Final[dict[str, LoxFunction]] = methods
 
@@ -18,6 +24,9 @@ class LoxClass(LoxCallable):
     def find_method(self, name: str) -> Optional[LoxFunction]:
         if name in self._methods:
             return self._methods[name]
+
+        if self.super_class is not None:
+            return self.super_class.find_method(name)
 
         return None
 

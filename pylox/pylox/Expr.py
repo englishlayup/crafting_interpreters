@@ -36,6 +36,9 @@ class Visitor[R]:
     def visit_Set_Expr(self, expr: Set) -> R: ...
 
     @abstractmethod
+    def visit_Super_Expr(self, expr: Super) -> R: ...
+
+    @abstractmethod
     def visit_Unary_Expr(self, expr: Unary) -> R: ...
 
     @abstractmethod
@@ -133,6 +136,17 @@ class Set(Expr):
     @override
     def accept[R](self, visitor: Visitor[R]) -> R:
         return visitor.visit_Set_Expr(self)
+
+
+class Super(Expr):
+    def __init__(self, keyword: Token, method: Token):
+        super().__init__()
+        self.keyword: Final[Token] = keyword
+        self.method: Final[Token] = method
+
+    @override
+    def accept[R](self, visitor: Visitor[R]) -> R:
+        return visitor.visit_Super_Expr(self)
 
 
 class Unary(Expr):

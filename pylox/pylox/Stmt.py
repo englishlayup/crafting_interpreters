@@ -1,9 +1,9 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Final, override
+from typing import Final, Optional, override
 
 from Token import Token
-from Expr import Expr
+from Expr import Expr, Variable
 
 
 class Stmt(ABC):
@@ -51,9 +51,12 @@ class Block(Stmt):
 
 
 class Class(Stmt):
-    def __init__(self, name: Token, methods: list[Function]):
+    def __init__(
+        self, name: Token, super_class: Optional[Variable], methods: list[Function]
+    ):
         super().__init__()
         self.name: Final[Token] = name
+        self.super_class: Final[Optional[Variable]] = super_class
         self.methods: Final[list[Function]] = methods
 
     @override

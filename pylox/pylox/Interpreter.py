@@ -108,13 +108,18 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
 
     @override
     def visit_Class_Stmt(self, stmt: Class) -> None:
+        super_class: object = None
+        if stmt.super_class is not None:
+            super_class = self._evaluate(stmt.super_class)
+            if not isinstance(super_class, self._klass_class):
+                raise RuntimeError(stmt.super_class.name, "Superclass must be a class.")
         self._environment.define(stmt.name.lexeme, None)
         methods: dict[str, LoxFunction] = {}
         for method in stmt.methods:
             is_init = method.name.lexeme == "init"
             function = self._function_class(method, self._environment, is_init)
             methods[method.name.lexeme] = function
-        klass = self._klass_class(stmt.name.lexeme, methods)
+        klass = self._klass_class(stmt.name.lexeme, super_class, methods)
         self._environment.assign(stmt.name, klass)
 
     def _stringify(self, obj: object):
