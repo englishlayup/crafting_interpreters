@@ -10,6 +10,7 @@ from Expr import (
     Literal,
     Logical,
     Set,
+    Super,
     This,
     Unary,
     Variable,
@@ -42,6 +43,7 @@ class _FunctionType(Enum):
 class _ClassType(Enum):
     NONE = auto()
     CLASS = auto()
+    SUBCLASS = auto()
 
 
 class Resolver(ExprVistor[None], StmtVisitor[None]):
@@ -69,11 +71,14 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
         self._declare(stmt.name)
         self._define(stmt.name)
 
-        if stmt.super_class is not None and stmt.name == stmt.super_class.name:
+        if stmt.super_class is not None and stmt.name.lexeme == stmt.super_class.name.lexeme:
             self._error(stmt.super_class.name, "A class can't inherit from itself.")
 
         if stmt.super_class is not None:
+            self._current_class = _ClassType.SUBCLASS
             self._resolve(stmt.super_class)
+            self._begin_scope()
+            self._scopes[-1]["super"] = True
 
         self._begin_scope()
         self._scopes[-1]["this"] = True
@@ -83,6 +88,9 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
             if method.name.lexeme == "init":
                 declaration = _FunctionType.INITIALIZER
             self._resolve_function(method, declaration)
+
+        if stmt.super_class is not None:
+            self._end_scope()
 
         self._end_scope()
         self._current_class = enclosing_class
@@ -160,6 +168,15 @@ class Resolver(ExprVistor[None], StmtVisitor[None]):
     def visit_Set_Expr(self, expr: Set) -> None:
         self._resolve(expr.object)
         self._resolve(expr.value)
+
+    @override
+    def visit_Super_Expr(self, expr: Super) -> None:
+        if self._current_class == _ClassType.NONE:
+            self._error(expr.keyword, "Can't use 'super' outside of a class.")
+        elif self._current_class != _ClassType.SUBCLASS:
+            self._error(expr.keyword, "Can't use 'super' in a class with no superclass.")
+
+        self._resolve_local(expr, expr.keyword)
 
     @override
     def visit_This_Expr(self, expr: This) -> None:

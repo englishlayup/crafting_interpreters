@@ -10,6 +10,7 @@ from Expr import (
     Literal,
     Logical,
     Set,
+    Super,
     This,
     Unary,
     Variable,
@@ -113,13 +114,22 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
             super_class = self._evaluate(stmt.super_class)
             if not isinstance(super_class, self._klass_class):
                 raise RuntimeError(stmt.super_class.name, "Superclass must be a class.")
+
         self._environment.define(stmt.name.lexeme, None)
+        if stmt.super_class is not None:
+            self._environment = Environment(self._environment)
+            self._environment.define("super", super_class)
+
         methods: dict[str, LoxFunction] = {}
         for method in stmt.methods:
             is_init = method.name.lexeme == "init"
             function = self._function_class(method, self._environment, is_init)
             methods[method.name.lexeme] = function
         klass = self._klass_class(stmt.name.lexeme, super_class, methods)
+
+        if stmt.super_class is not None:
+            if self._environment.enclosing is not None:
+                self._environment = self._environment.enclosing
         self._environment.assign(stmt.name, klass)
 
     def _stringify(self, obj: object):
@@ -256,6 +266,19 @@ class Interpreter(ExprVisitor[object], StmtVisitor[None]):
         value: object = self._evaluate(expr.value)
         obj.set(expr.name, value)
         return value
+
+    @override
+    def visit_Super_Expr(self, expr: Super) -> object:
+        distance: int = self._locals[expr]
+        super_class = self._environment.get_at(distance, "super")
+        assert(isinstance(super_class, self._klass_class))
+        obj = self._environment.get_at(distance - 1, "this")
+        assert(isinstance(obj, self._instance_class))
+        method = super_class.find_method(expr.method.lexeme)
+        if method is None:
+            raise RuntimeError(expr.method, f"Undefined property '{expr.method.lexeme}'.")
+        return method.bind(obj)
+
 
     @override
     def visit_This_Expr(self, expr: This) -> object:
