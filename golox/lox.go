@@ -42,7 +42,8 @@ func (lox Lox) runPrompt()  {
     }
 }
 
-func (lox Lox) run(source string)  {
+func (lox Lox) run(source string) error  {
+    return nil
 }
 
 func (lox Lox) report(line int, where string, message string)  {

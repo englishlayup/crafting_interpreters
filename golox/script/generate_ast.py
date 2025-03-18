@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from typing import TextIO
 
@@ -46,8 +47,18 @@ def generate_ast():
 
 
 def define_ast(output_dir: str, base_name: str, types: list[str]):
-    with open(f"{output_dir}/{base_name.lower()}.go", mode="w", encoding="utf-8") as f:
-        f.write(f"""package main
+    package_path = f"{output_dir}/internal/{base_name.lower()}"
+    os.makedirs(package_path, exist_ok=True)
+    with open(
+        f"{package_path}/{base_name.lower()}.go",
+        mode="w",
+        encoding="utf-8",
+    ) as f:
+        f.write(f"""package {base_name.lower()}
+
+import "github.com/englishlayup/crafting_interpreters/golox/internal/token"
+
+type Token = token.Token
 
 type {base_name}[R any] interface {{
     accept(visitor {base_name}Visitor[R]) R
