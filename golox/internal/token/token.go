@@ -3,23 +3,23 @@ package token
 import "fmt"
 
 type Token struct {
-	tokenType TokenType
-	lexeme    string
-	literal   interface{}
-	line      int
+	TokenType TokenType
+	Lexeme    string
+	Literal   interface{}
+	Line      int
 }
 
 func NewToken(tokenType TokenType, lexeme string, literal interface{}, line int) *Token {
 	return &Token{
-		tokenType: tokenType,
-		lexeme:    lexeme,
-		literal:   literal,
-		line:      line,
+		TokenType: tokenType,
+		Lexeme:    lexeme,
+		Literal:   literal,
+		Line:      line,
 	}
 }
 
 func (token Token) String() string {
-	return fmt.Sprintf("%v %v %v", token.tokenType, token.lexeme, token.literal)
+	return fmt.Sprintf("%v %v %v", token.TokenType, token.Lexeme, token.Literal)
 }
 
 type TokenType int

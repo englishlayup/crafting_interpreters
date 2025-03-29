@@ -5,10 +5,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+    "github.com/englishlayup/crafting_interpreters/golox/internal/scanner"
+    "github.com/englishlayup/crafting_interpreters/golox/internal/token"
+    "github.com/englishlayup/crafting_interpreters/golox/internal/interpreter"
 )
 
-type Lox struct {
-	interpreter     Interpreter
+type Interpreter = interpreter.Interpreter
+
+type Lox struct { interpreter     Interpreter
 	hadError        bool
 	hadRuntimeError bool
 }
@@ -42,8 +47,25 @@ func (lox Lox) runPrompt()  {
     }
 }
 
-func (lox Lox) run(source string) error  {
+func (lox Lox) run(source string) error {
+    scanner := scanner.NewScanner(source, lox.reportScannerError)
+    tokens := scanner.ScanTokens()
+    for _, t := range tokens {
+        fmt.Print(t.Lexeme)
+    }
     return nil
+}
+
+func (lox Lox) reportScannerError(line int, message string)  {
+    lox.report(line, "", message)
+}
+
+func (lox Lox) reportError(t token.Token, message string)  {
+    if t.TokenType == token.EOF {
+        lox.report(t.Line, " at end", message)
+    } else {
+        lox.report(t.Line, fmt.Sprintf(" at '%v'", t.Lexeme), message)
+    }
 }
 
 func (lox Lox) report(line int, where string, message string)  {

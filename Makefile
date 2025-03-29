@@ -17,5 +17,5 @@ generate_ast.pylox:
 
 generate_ast.golox:
 	python3 ./golox/script/generate_ast.py ./golox
-	go fmt ./golox/expr.go
-	go fmt ./golox/stmt.go
+	go fmt ./golox/internal/expr/expr.go
+	go fmt ./golox/internal/stmt/stmt.go
