@@ -49,6 +49,15 @@ def generate_ast():
 def define_ast(output_dir: str, base_name: str, types: list[str]):
     package_path = f"{output_dir}/internal/{base_name.lower()}"
     os.makedirs(package_path, exist_ok=True)
+    import_str = ""
+    if base_name == "Expr":
+        import_str = 'import "github.com/englishlayup/crafting_interpreters/golox/internal/token"'
+    if base_name == "Stmt":
+        import_str = """import (
+	"github.com/englishlayup/crafting_interpreters/golox/internal/expr"
+	"github.com/englishlayup/crafting_interpreters/golox/internal/token"
+)"""
+
     with open(
         f"{package_path}/{base_name.lower()}.go",
         mode="w",
@@ -56,9 +65,7 @@ def define_ast(output_dir: str, base_name: str, types: list[str]):
     ) as f:
         f.write(f"""package {base_name.lower()}
 
-import "github.com/englishlayup/crafting_interpreters/golox/internal/token"
-
-type Token = token.Token
+{import_str}
 
 type {base_name}[R any] interface {{
     accept(visitor {base_name}Visitor[R]) R
