@@ -14,18 +14,18 @@ def generate_ast():
         output_dir,
         "Expr",
         [
-            "Assign   : name Token, value Expr[R]",
-            "Binary   : left Expr[R], operator Token, right Expr[R]",
-            "Call     : callee Expr[R], paren Token, arguments []Expr[R]",
-            "Get      : object Expr[R], name Token",
+            "Assign   : name token.Token, value Expr[R]",
+            "Binary   : left Expr[R], operator token.Token, right Expr[R]",
+            "Call     : callee Expr[R], paren token.Token, arguments []Expr[R]",
+            "Get      : object Expr[R], name token.Token",
             "Grouping : expression Expr[R]",
             "Literal  : value interface{}",
-            "Logical  : left Expr[R], operator Token, right Expr[R]",
-            "Set      : object Expr[R], name Token, value Expr[R]",
-            "Super    : keyword Token, method Token",
-            "Unary    : operator Token, right Expr[R]",
-            "This     : keyword Token",
-            "Variable : name Token",
+            "Logical  : left Expr[R], operator token.Token, right Expr[R]",
+            "Set      : object Expr[R], name token.Token, value Expr[R]",
+            "Super    : keyword token.Token, method token.Token",
+            "Unary    : operator token.Token, right Expr[R]",
+            "This     : keyword token.Token",
+            "Variable : name token.Token",
         ],
     )
 
@@ -34,14 +34,14 @@ def generate_ast():
         "Stmt",
         [
             "Block      : statements []Stmt[R]",
-            "Class      : name Token, superClass Variable[R], methods []Function[R]",
-            "Expression : expression Expr[R]",
-            "Function   : name Token, params []Token, body []Stmt[R]",
-            "Iff        : condition Expr[R], thenBranch Stmt[R], elseBranch Stmt[R]",
-            "Print      : expression Expr[R]",
-            "Retern     : keyword Token, value Expr[R]",
-            "Vaar       : name Token, initializer Expr[R]",
-            "While      : condition Expr[R], body Stmt[R]",
+            "Class      : name token.Token, superClass expr.Variable[R], methods []Function[R]",
+            "Expression : expression expr.Expr[R]",
+            "Function   : name token.Token, params []token.Token, body []Stmt[R]",
+            "If        : condition expr.Expr[R], thenBranch Stmt[R], elseBranch Stmt[R]",
+            "Print      : expression expr.Expr[R]",
+            "Return     : keyword token.Token, value expr.Expr[R]",
+            "Var       : name token.Token, initializer expr.Expr[R]",
+            "While      : condition expr.Expr[R], body Stmt[R]",
         ],
     )
 
@@ -99,8 +99,8 @@ def define_type(f: TextIO, base_name: str, cls_name: str, field_list: str):
         f.write(f"  {field_name} {field_type}\n")
     f.write("}\n")
     f.write(f"""
-func ({cls_name.lower()} {cls_name}[R]) accept(visitor {base_name}Visitor[R]) R {{
-    return visitor.visit{cls_name}{base_name}({cls_name.lower()})
+func ({cls_name.lower()[0]} {cls_name}[R]) accept(visitor {base_name}Visitor[R]) R {{
+    return visitor.visit{cls_name}{base_name}({cls_name.lower()[0]})
 }}
 
 """)

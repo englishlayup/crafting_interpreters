@@ -2,8 +2,6 @@ package expr
 
 import "github.com/englishlayup/crafting_interpreters/golox/internal/token"
 
-type Token = token.Token
-
 type Expr[R any] interface {
 	accept(visitor ExprVisitor[R]) R
 }
@@ -24,109 +22,109 @@ type ExprVisitor[R any] interface {
 }
 
 type Assign[R any] struct {
-	name  Token
+	name  token.Token
 	value Expr[R]
 }
 
-func (assign Assign[R]) accept(visitor ExprVisitor[R]) R {
-	return visitor.visitAssignExpr(assign)
+func (a Assign[R]) accept(visitor ExprVisitor[R]) R {
+	return visitor.visitAssignExpr(a)
 }
 
 type Binary[R any] struct {
 	left     Expr[R]
-	operator Token
+	operator token.Token
 	right    Expr[R]
 }
 
-func (binary Binary[R]) accept(visitor ExprVisitor[R]) R {
-	return visitor.visitBinaryExpr(binary)
+func (b Binary[R]) accept(visitor ExprVisitor[R]) R {
+	return visitor.visitBinaryExpr(b)
 }
 
 type Call[R any] struct {
 	callee    Expr[R]
-	paren     Token
+	paren     token.Token
 	arguments []Expr[R]
 }
 
-func (call Call[R]) accept(visitor ExprVisitor[R]) R {
-	return visitor.visitCallExpr(call)
+func (c Call[R]) accept(visitor ExprVisitor[R]) R {
+	return visitor.visitCallExpr(c)
 }
 
 type Get[R any] struct {
 	object Expr[R]
-	name   Token
+	name   token.Token
 }
 
-func (get Get[R]) accept(visitor ExprVisitor[R]) R {
-	return visitor.visitGetExpr(get)
+func (g Get[R]) accept(visitor ExprVisitor[R]) R {
+	return visitor.visitGetExpr(g)
 }
 
 type Grouping[R any] struct {
 	expression Expr[R]
 }
 
-func (grouping Grouping[R]) accept(visitor ExprVisitor[R]) R {
-	return visitor.visitGroupingExpr(grouping)
+func (g Grouping[R]) accept(visitor ExprVisitor[R]) R {
+	return visitor.visitGroupingExpr(g)
 }
 
 type Literal[R any] struct {
 	value interface{}
 }
 
-func (literal Literal[R]) accept(visitor ExprVisitor[R]) R {
-	return visitor.visitLiteralExpr(literal)
+func (l Literal[R]) accept(visitor ExprVisitor[R]) R {
+	return visitor.visitLiteralExpr(l)
 }
 
 type Logical[R any] struct {
 	left     Expr[R]
-	operator Token
+	operator token.Token
 	right    Expr[R]
 }
 
-func (logical Logical[R]) accept(visitor ExprVisitor[R]) R {
-	return visitor.visitLogicalExpr(logical)
+func (l Logical[R]) accept(visitor ExprVisitor[R]) R {
+	return visitor.visitLogicalExpr(l)
 }
 
 type Set[R any] struct {
 	object Expr[R]
-	name   Token
+	name   token.Token
 	value  Expr[R]
 }
 
-func (set Set[R]) accept(visitor ExprVisitor[R]) R {
-	return visitor.visitSetExpr(set)
+func (s Set[R]) accept(visitor ExprVisitor[R]) R {
+	return visitor.visitSetExpr(s)
 }
 
 type Super[R any] struct {
-	keyword Token
-	method  Token
+	keyword token.Token
+	method  token.Token
 }
 
-func (super Super[R]) accept(visitor ExprVisitor[R]) R {
-	return visitor.visitSuperExpr(super)
+func (s Super[R]) accept(visitor ExprVisitor[R]) R {
+	return visitor.visitSuperExpr(s)
 }
 
 type Unary[R any] struct {
-	operator Token
+	operator token.Token
 	right    Expr[R]
 }
 
-func (unary Unary[R]) accept(visitor ExprVisitor[R]) R {
-	return visitor.visitUnaryExpr(unary)
+func (u Unary[R]) accept(visitor ExprVisitor[R]) R {
+	return visitor.visitUnaryExpr(u)
 }
 
 type This[R any] struct {
-	keyword Token
+	keyword token.Token
 }
 
-func (this This[R]) accept(visitor ExprVisitor[R]) R {
-	return visitor.visitThisExpr(this)
+func (t This[R]) accept(visitor ExprVisitor[R]) R {
+	return visitor.visitThisExpr(t)
 }
 
 type Variable[R any] struct {
-	name Token
+	name token.Token
 }
 
-func (variable Variable[R]) accept(visitor ExprVisitor[R]) R {
-	return visitor.visitVariableExpr(variable)
+func (v Variable[R]) accept(visitor ExprVisitor[R]) R {
+	return visitor.visitVariableExpr(v)
 }

@@ -1,10 +1,9 @@
 package stmt
 
-import "github.com/englishlayup/crafting_interpreters/golox/internal/token"
-
-import "github.com/englishlayup/crafting_interpreters/golox/internal/expr"
-
-type Token = token.Token
+import (
+	"github.com/englishlayup/crafting_interpreters/golox/internal/expr"
+	"github.com/englishlayup/crafting_interpreters/golox/internal/token"
+)
 
 type Stmt[R any] interface {
 	accept(visitor StmtVisitor[R]) R
@@ -15,10 +14,10 @@ type StmtVisitor[R any] interface {
 	visitClassStmt(stmt Class[R]) R
 	visitExpressionStmt(stmt Expression[R]) R
 	visitFunctionStmt(stmt Function[R]) R
-	visitIffStmt(stmt Iff[R]) R
+	visitIfStmt(stmt If[R]) R
 	visitPrintStmt(stmt Print[R]) R
-	visitReternStmt(stmt Retern[R]) R
-	visitVaarStmt(stmt Vaar[R]) R
+	visitReturnStmt(stmt Return[R]) R
+	visitVarStmt(stmt Var[R]) R
 	visitWhileStmt(stmt While[R]) R
 }
 
@@ -26,72 +25,72 @@ type Block[R any] struct {
 	statements []Stmt[R]
 }
 
-func (block Block[R]) accept(visitor StmtVisitor[R]) R {
-	return visitor.visitBlockStmt(block)
+func (b Block[R]) accept(visitor StmtVisitor[R]) R {
+	return visitor.visitBlockStmt(b)
 }
 
 type Class[R any] struct {
-	name       Token
+	name       token.Token
 	superClass expr.Variable[R]
 	methods    []Function[R]
 }
 
-func (class Class[R]) accept(visitor StmtVisitor[R]) R {
-	return visitor.visitClassStmt(class)
+func (c Class[R]) accept(visitor StmtVisitor[R]) R {
+	return visitor.visitClassStmt(c)
 }
 
 type Expression[R any] struct {
 	expression expr.Expr[R]
 }
 
-func (expression Expression[R]) accept(visitor StmtVisitor[R]) R {
-	return visitor.visitExpressionStmt(expression)
+func (e Expression[R]) accept(visitor StmtVisitor[R]) R {
+	return visitor.visitExpressionStmt(e)
 }
 
 type Function[R any] struct {
-	name   Token
-	params []Token
+	name   token.Token
+	params []token.Token
 	body   []Stmt[R]
 }
 
-func (function Function[R]) accept(visitor StmtVisitor[R]) R {
-	return visitor.visitFunctionStmt(function)
+func (f Function[R]) accept(visitor StmtVisitor[R]) R {
+	return visitor.visitFunctionStmt(f)
 }
 
-type Iff[R any] struct {
+type If[R any] struct {
 	condition  expr.Expr[R]
 	thenBranch Stmt[R]
 	elseBranch Stmt[R]
 }
 
-func (iff Iff[R]) accept(visitor StmtVisitor[R]) R {
-	return visitor.visitIffStmt(iff)
+func (i If[R]) accept(visitor StmtVisitor[R]) R {
+	return visitor.visitIfStmt(i)
 }
 
 type Print[R any] struct {
 	expression expr.Expr[R]
 }
 
-func (print Print[R]) accept(visitor StmtVisitor[R]) R {
-	return visitor.visitPrintStmt(print)
+func (p Print[R]) accept(visitor StmtVisitor[R]) R {
+	return visitor.visitPrintStmt(p)
 }
 
-type Retern[R any] struct {
-	keyword Token
+type Return[R any] struct {
+	keyword token.Token
 	value   expr.Expr[R]
 }
 
-func (retern Retern[R]) accept(visitor StmtVisitor[R]) R {
-	return visitor.visitReternStmt(retern)
+func (r Return[R]) accept(visitor StmtVisitor[R]) R {
+	return visitor.visitReturnStmt(r)
 }
 
-type Vaar[R any] struct {
-	name        Token
+type Var[R any] struct {
+	name        token.Token
 	initializer expr.Expr[R]
 }
 
-func (vaar Vaar[R]) accept(visitor StmtVisitor[R]) R {
-	return visitor.visitVaarStmt(vaar)
+func (v Var[R]) accept(visitor StmtVisitor[R]) R {
+	return visitor.visitVarStmt(v)
 }
 
 type While[R any] struct {
@@ -99,6 +98,6 @@ type While[R any] struct {
 	body      Stmt[R]
 }
 
-func (while While[R]) accept(visitor StmtVisitor[R]) R {
-	return visitor.visitWhileStmt(while)
+func (w While[R]) accept(visitor StmtVisitor[R]) R {
+	return visitor.visitWhileStmt(w)
 }
