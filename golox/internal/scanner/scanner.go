@@ -1,7 +1,6 @@
 package scanner
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"unicode"

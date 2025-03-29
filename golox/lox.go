@@ -13,12 +13,13 @@ import (
 
 type Interpreter = interpreter.Interpreter
 
-type Lox struct { interpreter     Interpreter
+type Lox struct {
+    interpreter     Interpreter
 	hadError        bool
 	hadRuntimeError bool
 }
 
-func (lox Lox) runFile(path string)  {
+func (lox *Lox) runFile(path string)  {
     fileData, err := os.ReadFile(path)
     if err != nil {
         log.Fatal(err)
@@ -34,7 +35,7 @@ func (lox Lox) runFile(path string)  {
     }
 }
 
-func (lox Lox) runPrompt()  {
+func (lox *Lox) runPrompt()  {
     reader := bufio.NewReader(os.Stdin)
     for {
         fmt.Print(">")
@@ -47,7 +48,7 @@ func (lox Lox) runPrompt()  {
     }
 }
 
-func (lox Lox) run(source string) error {
+func (lox *Lox) run(source string) error {
     scanner := scanner.NewScanner(source, lox.reportScannerError)
     tokens := scanner.ScanTokens()
     for _, t := range tokens {
@@ -56,11 +57,11 @@ func (lox Lox) run(source string) error {
     return nil
 }
 
-func (lox Lox) reportScannerError(line int, message string)  {
+func (lox *Lox) reportScannerError(line int, message string)  {
     lox.report(line, "", message)
 }
 
-func (lox Lox) reportError(t token.Token, message string)  {
+func (lox *Lox) reportError(t token.Token, message string)  {
     if t.TokenType == token.EOF {
         lox.report(t.Line, " at end", message)
     } else {
@@ -68,7 +69,7 @@ func (lox Lox) reportError(t token.Token, message string)  {
     }
 }
 
-func (lox Lox) report(line int, where string, message string)  {
+func (lox *Lox) report(line int, where string, message string)  {
     fmt.Fprintf(os.Stderr, "[line %v] Error%v: %v", line, where, message)
     lox.hadError = true
 }
