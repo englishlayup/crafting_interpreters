@@ -17,8 +17,8 @@ type Scanner struct {
 	reportError func(int, string)
 }
 
-func NewScanner(source string, report func(int, string)) *Scanner {
-	return &Scanner{
+func NewScanner(source string, report func(int, string)) Scanner {
+	return Scanner{
 		source:      source,
 		tokens:      make([]token.Token, 0),
 		current:     0,

@@ -19,7 +19,7 @@ def generate_ast():
             "Call     : callee Expr[R], paren token.Token, arguments []Expr[R]",
             "Get      : object Expr[R], name token.Token",
             "Grouping : expression Expr[R]",
-            "Literal  : value interface{}",
+            "Literal  : value any",
             "Logical  : left Expr[R], operator token.Token, right Expr[R]",
             "Set      : object Expr[R], name token.Token, value Expr[R]",
             "Super    : keyword token.Token, method token.Token",
@@ -37,10 +37,10 @@ def generate_ast():
             "Class      : name token.Token, superClass expr.Variable[R], methods []Function[R]",
             "Expression : expression expr.Expr[R]",
             "Function   : name token.Token, params []token.Token, body []Stmt[R]",
-            "If        : condition expr.Expr[R], thenBranch Stmt[R], elseBranch Stmt[R]",
+            "If         : condition expr.Expr[R], thenBranch Stmt[R], elseBranch Stmt[R]",
             "Print      : expression expr.Expr[R]",
             "Return     : keyword token.Token, value expr.Expr[R]",
-            "Var       : name token.Token, initializer expr.Expr[R]",
+            "Var        : name token.Token, initializer expr.Expr[R]",
             "While      : condition expr.Expr[R], body Stmt[R]",
         ],
     )
@@ -68,7 +68,7 @@ def define_ast(output_dir: str, base_name: str, types: list[str]):
 {import_str}
 
 type {base_name}[R any] interface {{
-    accept(visitor {base_name}Visitor[R]) R
+    Accept(visitor {base_name}Visitor[R]) R
 }}
 
 """)
@@ -85,7 +85,7 @@ def define_visitor(f: TextIO, base_name: str, types: list[str]):
     for type in types:
         type_name = type.split(":", maxsplit=1)[0].strip()
         f.write(
-            f"    visit{type_name}{base_name}({base_name.lower()} {type_name}[R]) R\n",
+            f"    Visit{type_name}{base_name}({base_name.lower()} {type_name}[R]) R\n",
         )
     f.write("}\n\n")
 
@@ -96,11 +96,11 @@ def define_type(f: TextIO, base_name: str, cls_name: str, field_list: str):
     for field in fields:
         field_name = field.split()[0].strip()
         field_type = field.split()[1].strip()
-        f.write(f"  {field_name} {field_type}\n")
+        f.write(f"  {field_name.capitalize()} {field_type}\n")
     f.write("}\n")
     f.write(f"""
-func ({cls_name.lower()[0]} {cls_name}[R]) accept(visitor {base_name}Visitor[R]) R {{
-    return visitor.visit{cls_name}{base_name}({cls_name.lower()[0]})
+func ({cls_name.lower()[0]} {cls_name}[R]) Accept(visitor {base_name}Visitor[R]) R {{
+    return visitor.Visit{cls_name}{base_name}({cls_name.lower()[0]})
 }}
 
 """)
