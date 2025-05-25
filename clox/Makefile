@@ -7,7 +7,7 @@ DBG = lldb
 # https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html
 .PHONY: build-main
 build-main: build-dir
-	$(CC) -Wall -O0 -g -o build/main *.c
+	bazel build //:clox
 
 .PHONY: check
 check:
@@ -20,7 +20,7 @@ build-dir:
 
 .PHONY: run
 run: build-main
-	./build/main
+	bazel run //:clox
 
 .PHONY: debug
 debug: build-main
