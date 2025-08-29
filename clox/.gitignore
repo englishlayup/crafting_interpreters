@@ -51,6 +51,8 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+/build
+
 # gitignore template for Bazel build system
 # website: https://bazel.build/
 

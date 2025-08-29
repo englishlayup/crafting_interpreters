@@ -1,2 +1,0 @@
-build --action_env=CC=clang
-build --action_env=CXX=clang++
