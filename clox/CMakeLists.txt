@@ -15,27 +15,17 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
 set(CMAKE_C_COMPILER clang)
 
 # Define source files
-set(SOURCES
-    chunk.c
-    debug.c
-    main.c
-    memory.c
-    value.c
-)
+set(SOURCES chunk.c debug.c main.c memory.c value.c line.c)
 
 # Define header files (optional for CMake, but good for IDE integration)
-set(HEADERS
-    chunk.h
-    common.h
-    debug.h
-    memory.h
-    value.h
-)
+set(HEADERS chunk.h common.h debug.h memory.h value.h line.h)
 
 # Add executable
 add_executable(clox ${SOURCES} ${HEADERS})
 
+add_executable(line_test)
+
+target_sources(line_test PRIVATE line_test.c line.c munit.c memory.c)
+
 # Debug configuration
-set_target_properties(clox PROPERTIES
-    DEBUG_POSTFIX "_debug"
-)
+set_target_properties(clox PROPERTIES DEBUG_POSTFIX "_debug")
