@@ -15,10 +15,10 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
 set(CMAKE_C_COMPILER clang)
 
 # Define source files
-set(SOURCES chunk.c debug.c main.c memory.c value.c)
+set(SOURCES chunk.c debug.c main.c memory.c value.c vm.c)
 
 # Define header files (optional for CMake, but good for IDE integration)
-set(HEADERS chunk.h common.h debug.h memory.h value.h)
+set(HEADERS chunk.h common.h debug.h memory.h value.h vm.h)
 
 # Add executable
 add_executable(clox ${SOURCES} ${HEADERS})

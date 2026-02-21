@@ -18,7 +18,7 @@ typedef struct {
 typedef struct {
   int count;
   int capacity;
-  uint8_t *code;
+  uint8_t *code; // list of op codes
   ValueArray constants;
   int lineCount;
   int lineCapacity;
